@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          Role      @default(BROKER)
+  credits       Int       @default(0)
+  
+  // Relations
+  leadsCreated  Lead[]    @relation("SourceProvider")
+  leadsBought   Lead[]    @relation("BuyerBroker")
+  reservations  MarketplaceReservation[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  PROVIDER
+  BROKER
+}
+
+model Lead {
+  id              String         @id @default(cuid())
+  productType     ProductType
+  status          LeadStatus     @default(STOCK)
+  
+  // Basic Info
+  firstName       String
+  lastName        String
+  phone           String
+  email           String
+  zipCode         String
+  city            String
+  
+  // Dynamic Attributes
+  attributes      Json           // Specific fields for the 18 products
+  
+  // Options
+  isAppointment   Boolean        @default(false)
+  isExclusive     Boolean        @default(true)
+  price           Float
+  
+  // Consent
+  consent         Consent?
+  
+  // Relations
+  providerId      String
+  provider        User           @relation("SourceProvider", fields: [providerId], references: [id])
+  brokerId        String?
+  broker          User?          @relation("BuyerBroker", fields: [brokerId], references: [id])
+  
+  reservation     MarketplaceReservation?
+  
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status])
+  @@index([productType])
+}
+
+model Consent {
+  id              String   @id @default(cuid())
+  leadId          String   @unique
+  lead            Lead     @relation(fields: [leadId], references: [id])
+  
+  consentText     String
+  ipAddress       String
+  userAgent       String
+  urlSource       String
+  timestamp       DateTime @default(now())
+  proofHash       String?
+}
+
+model MarketplaceReservation {
+  id        String   @id @default(cuid())
+  leadId    String   @unique
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  brokerId  String
+  broker    User     @relation(fields: [brokerId], references: [id])
+  
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+enum LeadStatus {
+  STOCK
+  RESERVED
+  SOLD
+  REJECTED
+}
+
+enum ProductType {
+  CREDIT_IMMO
+  RACHAT_CREDIT
+  CREDIT_PRO
+  ASSURANCE_EMPRUNTEUR
+  MUTUELLE_SANTE_IND
+  MUTUELLE_ENTREPRISE
+  PREVOYANCE_TNS
+  ASSURANCE_AUTO
+  ASSURANCE_MRH
+  ASSURANCE_CHIEN_CHAT
+  RC_PRO
+  MULTIRISQUE_PRO
+  RC_DECENNALE
+  DOMMAGE_OUVRAGE
+  MULTIRISQUE_IMMEUBLE
+  ASSURANCE_OBSEQUES
+  ASSURANCE_VIE_RETRAITE
+  DEFISCALISATION
+}
