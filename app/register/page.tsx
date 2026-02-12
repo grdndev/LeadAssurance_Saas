@@ -7,22 +7,54 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Loader2, Users, Upload } from "lucide-react";
+import { ShieldCheck, Loader2, Users, Upload, AlertCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState<"broker" | "provider">("broker");
+  const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<"BROKER" | "PROVIDER">("BROKER");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          name: `${formData.firstName} ${formData.lastName}`,
+          role,
+        }),
+      });
 
-    // Redirect to appropriate dashboard
-    router.push(role === "broker" ? "/dashboard" : "/dashboard/provider");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Une erreur est survenue");
+      }
+
+      // Success - Redirect to login
+      router.push("/login?registered=true");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   return (
@@ -33,7 +65,7 @@ export default function RegisterPage() {
       </div>
 
       <Card className="w-full max-w-md border-border/50 shadow-2xl">
-        <CardHeader className="space-y-1 text-center pb-6">
+        < CardHeader className="space-y-1 text-center pb-6">
           <Link href="/" className="flex justify-center mb-4">
             <div className="text-2xl font-bold tracking-tighter">
               <span className="text-primary">LEADS</span>ASSURANCE
@@ -47,30 +79,37 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-6">
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+
             {/* Role Selection */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setRole("broker")}
-                className={`p-4 rounded-xl border-2 transition-all ${role === "broker"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
+                onClick={() => setRole("BROKER")}
+                className={`p-4 rounded-xl border-2 transition-all ${role === "BROKER"
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50"
                   }`}
               >
-                <Users className={`h-6 w-6 mx-auto mb-2 ${role === "broker" ? "text-primary" : "text-muted-foreground"}`} />
-                <div className={`text-sm font-semibold ${role === "broker" ? "text-primary" : ""}`}>Courtier</div>
+                <Users className={`h-6 w-6 mx-auto mb-2 ${role === "BROKER" ? "text-primary" : "text-muted-foreground"}`} />
+                <div className={`text-sm font-semibold ${role === "BROKER" ? "text-primary" : ""}`}>Courtier</div>
                 <div className="text-xs text-muted-foreground">J'achète des leads</div>
               </button>
               <button
                 type="button"
-                onClick={() => setRole("provider")}
-                className={`p-4 rounded-xl border-2 transition-all ${role === "provider"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
+                onClick={() => setRole("PROVIDER")}
+                className={`p-4 rounded-xl border-2 transition-all ${role === "PROVIDER"
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50"
                   }`}
               >
-                <Upload className={`h-6 w-6 mx-auto mb-2 ${role === "provider" ? "text-primary" : "text-muted-foreground"}`} />
-                <div className={`text-sm font-semibold ${role === "provider" ? "text-primary" : ""}`}>Apporteur</div>
+                <Upload className={`h-6 w-6 mx-auto mb-2 ${role === "PROVIDER" ? "text-primary" : "text-muted-foreground"}`} />
+                <div className={`text-sm font-semibold ${role === "PROVIDER" ? "text-primary" : ""}`}>Apporteur</div>
                 <div className="text-xs text-muted-foreground">Je vends des leads</div>
               </button>
             </div>
@@ -78,11 +117,25 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="firstName">Prénom</Label>
-                <Input id="firstName" placeholder="Jean" className="rounded-full" required />
+                <Input
+                  id="firstName"
+                  placeholder="Jean"
+                  className="rounded-full"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="lastName">Nom</Label>
-                <Input id="lastName" placeholder="Dupont" className="rounded-full" required />
+                <Input
+                  id="lastName"
+                  placeholder="Dupont"
+                  className="rounded-full"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
             </div>
 
@@ -93,18 +146,22 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="nom@entreprise.com"
                 className="rounded-full"
+                value={formData.email}
+                onChange={handleInputChange}
                 required
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="company">Nom de l'entreprise</Label>
-              <Input id="company" placeholder="Mon Courtage SARL" className="rounded-full" required />
-            </div>
-
-            <div className="grid gap-2">
               <Label htmlFor="password">Mot de passe</Label>
-              <Input id="password" type="password" className="rounded-full" required />
+              <Input
+                id="password"
+                type="password"
+                className="rounded-full"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
             </div>
 
             <div className="flex items-start gap-2">
@@ -128,7 +185,7 @@ export default function RegisterPage() {
               ) : (
                 <>
                   <ShieldCheck className="mr-2 h-4 w-4" />
-                  Créer mon compte {role === "broker" ? "courtier" : "apporteur"}
+                  Créer mon compte {role === "BROKER" ? "courtier" : "apporteur"}
                 </>
               )}
             </Button>
@@ -144,3 +201,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

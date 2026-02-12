@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Zap, BarChart3 } from "lucide-react";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -18,32 +19,36 @@ export function Hero() {
         />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:pt-40">
+      <div className="mx-auto max-w-7xl px-4 pb-24 pt-20 sm:pb-32 lg:flex lg:px-8 lg:pt-40">
         <div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="mt-24 sm:mt-32 lg:mt-16">
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold leading-6 text-primary ring-1 ring-inset ring-primary/20">
+            <div className="mt-12 sm:mt-32 lg:mt-16">
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs sm:text-sm font-semibold leading-6 text-primary ring-1 ring-inset ring-primary/20">
                 Marketplace Leads Assurance & Crédit
               </span>
             </div>
-            <h1 className="mt-10 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+            <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-6xl">
               Qualité, Transparence et <span className="text-primary">Conformité RGPD</span>
             </h1>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            <p className="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-muted-foreground">
               Achetez des leads et rendez-vous qualifiés en exclusivité ou via notre salle de marché.
               Accédez instantanément à la preuve de consentement pour chaque opportunité.
             </p>
-            <div className="mt-10 flex items-center gap-x-6">
-              <Button size="lg" className="rounded-full px-8">
-                Espace Courtier <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="lg" className="rounded-full">
-                Devenir Apporteur
-              </Button>
+            <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-x-6">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full rounded-full px-8">
+                  Espace Courtier <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button variant="ghost" size="lg" className="w-full rounded-full">
+                  Devenir Apporteur
+                </Button>
+              </Link>
             </div>
           </motion.div>
 
@@ -51,7 +56,7 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 1 }}
-            className="mt-12 flex gap-6 text-sm text-muted-foreground"
+            className="mt-12 flex flex-wrap gap-6 text-sm text-muted-foreground"
           >
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
@@ -90,9 +95,13 @@ export function Hero() {
                       <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
                         <Zap className="h-5 w-5 text-primary" />
                       </div>
-                      <div>
+                      <div className="hidden sm:block">
                         <div className="text-sm font-medium">Lead Crédit Immobilier</div>
                         <div className="text-xs text-muted-foreground">Lyon (69) • Nouveau Prêt</div>
+                      </div>
+                      <div className="sm:hidden">
+                        <div className="text-sm font-medium leading-none">Immo</div>
+                        <div className="text-[10px] text-muted-foreground mt-1">Lyon</div>
                       </div>
                     </div>
                     <div className="text-right">

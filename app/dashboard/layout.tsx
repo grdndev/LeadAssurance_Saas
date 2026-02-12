@@ -19,6 +19,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 export default function DashboardLayout({
   children,
@@ -27,9 +28,11 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   // Determine if it's a provider or broker dashboard based on URL
   const isProvider = pathname?.includes("/provider");
+  const userRole = (session?.user as any)?.role;
 
   const brokerNavigation = [
     { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
@@ -46,6 +49,10 @@ export default function DashboardLayout({
   ];
 
   const navigation = isProvider ? providerNavigation : brokerNavigation;
+
+  const getInitials = (name: string) => {
+    return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "??";
+  };
 
   return (
     <div className="min-h-screen bg-secondary/30 text-foreground">
@@ -89,13 +96,13 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        {/* Switch Role */}
+        {/* Admin or Switching Role feature - only if user has both or for demo */}
         <div className="px-4 mt-6">
           <Link
             href={isProvider ? "/dashboard" : "/dashboard/provider"}
             className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-medium text-muted-foreground hover:text-primary transition-colors border border-dashed border-border rounded-lg"
           >
-            Basculer vers {isProvider ? "Courtier" : "Apporteur"}
+            Basculer vers {isProvider ? "Courtier" : "Apporteur"} (Démo)
           </Link>
         </div>
 
@@ -107,7 +114,10 @@ export default function DashboardLayout({
             <Settings className="mr-3 h-5 w-5" />
             Paramètres
           </Link>
-          <button className="mt-2 flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all">
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="mt-2 flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+          >
             <LogOut className="mr-3 h-5 w-5" />
             Déconnexion
           </button>
@@ -136,8 +146,14 @@ export default function DashboardLayout({
               <Bell className="h-6 w-6" />
               <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">3</span>
             </button>
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs shadow-lg">
-              JS
+            <div className="flex items-center gap-3 ml-2">
+              <div className="hidden md:block text-right">
+                <p className="text-xs font-bold leading-none">{session?.user?.name}</p>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">{userRole}</p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg border-2 border-background">
+                {getInitials(session?.user?.name || "")}
+              </div>
             </div>
           </div>
         </header>
@@ -149,3 +165,4 @@ export default function DashboardLayout({
     </div>
   );
 }
+

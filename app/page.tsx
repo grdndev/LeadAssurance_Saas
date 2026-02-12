@@ -1,6 +1,7 @@
 import { Hero } from "@/components/marketing/Hero";
 import { ProductGrid } from "@/components/marketing/ProductGrid";
 import { Shield, Zap, CheckCircle2, FileText, BarChart3, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -8,24 +9,31 @@ export default function Home() {
       {/* Navbar Minimaliste Premium */}
       <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-background/50 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-          <div className="text-xl font-bold tracking-tighter">
+          <Link href="/" className="text-xl font-bold tracking-tighter">
             <span className="text-primary">LEADS</span>ASSURANCE
+          </Link>
+
+          <div className="hidden gap-8 text-sm font-medium md:flex">
+            <Link href="/dashboard/marketplace" className="hover:text-primary transition-colors">Salle de Marché</Link>
+            <Link href="/blog" className="hover:text-primary transition-colors">Blog & Conseils</Link>
+            <Link href="#" className="hover:text-primary transition-colors">Tarifs</Link>
           </div>
-          <div className="hidden gap-8 text-sm font-medium lg:flex">
-            <a href="#" className="hover:text-primary transition-colors">Salle de Marché</a>
-            <a href="#" className="hover:text-primary transition-colors">Produits</a>
-            <a href="#" className="hover:text-primary transition-colors">Tarifs</a>
-          </div>
-          <div className="flex gap-4">
-            <button className="text-sm font-medium hover:text-primary transition-colors">Connexion</button>
-            <button className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity">Inscription</button>
+
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="hidden sm:block text-sm font-medium hover:text-primary transition-colors">Connexion</Link>
+            <Link href="/register">
+              <button className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
+                Démarrer
+              </button>
+            </Link>
+            {/* Mobile Menu Trigger could be added here if needed, but for now we optimize existing links */}
           </div>
         </div>
       </nav>
 
       <main className="flex-grow">
         <Hero />
-        
+
         {/* Features Section */}
         <section className="py-24 bg-background">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -66,7 +74,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className="py-24 overflow-hidden relative isolate">
-           <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-4xl rounded-3xl bg-primary px-8 py-16 text-center shadow-2xl sm:px-16">
               <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
                 Prêt à booster votre production ?

@@ -3,14 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -18,12 +20,26 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-    // Redirect to dashboard (in real app, this would be after auth)
-    router.push("/dashboard");
+      if (res?.error) {
+        setError("Identifiants incorrects ou compte non trouvé.");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err) {
+      setError("Une erreur est survenue lors de la connexion.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,6 +69,12 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-6">
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -106,3 +128,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

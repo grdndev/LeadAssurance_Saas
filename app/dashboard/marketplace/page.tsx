@@ -12,10 +12,11 @@ import {
   AlertCircle,
   Calendar,
   RefreshCw,
-  Search
+  Search,
+  Loader2
 } from "lucide-react";
 import { PRODUCTS, getProductById } from "@/lib/constants/products";
-import { MOCK_LEADS, getLeadFreshness, isUltraFresh } from "@/lib/types/leads";
+import { getLeadFreshness, isUltraFresh } from "@/lib/types/leads";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,18 +36,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 export default function MarketplacePage() {
+  const [leads, setLeads] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProductType, setSelectedProductType] = useState("all");
   const [zipFilter, setZipFilter] = useState("");
   const [reservedLead, setReservedLead] = useState<string | null>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedLeadForPurchase, setSelectedLeadForPurchase] = useState<typeof MOCK_LEADS[0] | null>(null);
+  const [selectedLeadForPurchase, setSelectedLeadForPurchase] = useState<any | null>(null);
   const [timeLeft, setTimeLeft] = useState(600);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [boughtLeadDetails, setBoughtLeadDetails] = useState<any | null>(null);
 
-  const userCredits = 450;
+  const router = useRouter();
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [leadsRes, profileRes] = await Promise.all([
+        fetch("/api/marketplace/leads"),
+        fetch("/api/user/profile")
+      ]);
+      const leadsData = await leadsRes.json();
+      const profileData = await profileRes.json();
+      setLeads(leadsData);
+      setUserProfile(profileData);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -66,7 +95,7 @@ export default function MarketplacePage() {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const handleBuyClick = (lead: typeof MOCK_LEADS[0]) => {
+  const handleBuyClick = (lead: any) => {
     setSelectedLeadForPurchase(lead);
     setReservedLead(lead.id);
     setTimeLeft(600);
@@ -74,10 +103,33 @@ export default function MarketplacePage() {
     setShowPaymentDialog(true);
   };
 
-  const handleConfirmPurchase = () => {
-    if (selectedLeadForPurchase) {
+  const handleConfirmPurchase = async () => {
+    if (!selectedLeadForPurchase) return;
+
+    setPurchasing(true);
+    try {
+      const response = await fetch("/api/marketplace/buy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId: selectedLeadForPurchase.id }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erreur lors de l'achat");
+      }
+
+      setBoughtLeadDetails(result.lead);
       setPurchaseSuccess(true);
-      // In real app: API call to complete purchase
+      // Refresh user profile for credits
+      const profileRes = await fetch("/api/user/profile");
+      const profileData = await profileRes.json();
+      setUserProfile(profileData);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPurchasing(false);
     }
   };
 
@@ -90,12 +142,11 @@ export default function MarketplacePage() {
   };
 
   const handleCloseSuccess = () => {
-    handleCancelReservation();
-    // In real app: redirect to leads page or refresh
+    router.push("/dashboard/leads");
   };
 
   // Filter leads
-  const filteredLeads = MOCK_LEADS.filter(lead => {
+  const filteredLeads = (Array.isArray(leads) ? leads : []).filter(lead => {
     const product = getProductById(lead.productType);
     const matchesCategory = selectedCategory === "All" || product?.category === selectedCategory;
     const matchesProduct = selectedProductType === "all" || lead.productType === selectedProductType;
@@ -104,7 +155,7 @@ export default function MarketplacePage() {
   });
 
   // Get unique product types for filter
-  const availableProducts = [...new Set(MOCK_LEADS.map(l => l.productType))];
+  const availableProducts = [...new Set(leads.map(l => l.productType))];
 
   return (
     <div className="space-y-8">
@@ -115,10 +166,10 @@ export default function MarketplacePage() {
         </div>
         <div className="flex items-center gap-4">
           <Badge variant="outline" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
-            Crédit: {userCredits.toFixed(2)} €
+            Crédit: {userProfile?.credits?.toFixed(2) || "0.00"} €
           </Badge>
-          <Button variant="outline" size="sm" className="rounded-full">
-            <RefreshCw className="h-4 w-4 mr-2" /> Actualiser
+          <Button variant="outline" size="sm" onClick={fetchData} className="rounded-full">
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Actualiser
           </Button>
         </div>
       </div>
@@ -179,99 +230,97 @@ export default function MarketplacePage() {
       {/* Leads Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <AnimatePresence>
-          {filteredLeads.map((lead) => {
-            const product = getProductById(lead.productType);
-            const isReservedByMe = reservedLead === lead.id;
-            const isReservedByOther = reservedLead && reservedLead !== lead.id;
-            const freshness = getLeadFreshness(lead.createdAt);
-            const ultraFresh = isUltraFresh(lead.createdAt);
+          {loading ? (
+            <div className="col-span-full flex justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            filteredLeads.map((lead) => {
+              const product = getProductById(lead.productType);
+              const isReservedByMe = reservedLead === lead.id;
+              const freshness = getLeadFreshness(lead.createdAt);
+              const ultraFresh = isUltraFresh(lead.createdAt);
 
-            return (
-              <motion.div
-                key={lead.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-              >
-                <Card className={`relative overflow-hidden border-border/50 bg-background/50 hover:border-primary/50 transition-all ${isReservedByMe ? "ring-2 ring-primary" : ""} ${isReservedByOther ? "opacity-50" : ""}`}>
-                  {ultraFresh && (
-                    <div className="absolute top-0 right-0">
-                      <div className="bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-                        Ultra-Frais
-                      </div>
-                    </div>
-                  )}
-
-                  {lead.isAppointment && (
-                    <div className="absolute top-0 left-0">
-                      <div className="bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg uppercase tracking-wider flex items-center gap-1">
-                        <Calendar className="h-3 w-3" /> RDV
-                      </div>
-                    </div>
-                  )}
-
-                  <CardContent className="p-6 pt-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                        {product ? <product.icon className="h-6 w-6" /> : <Euro className="h-6 w-6" />}
-                      </div>
-                      <div>
-                        <div className="font-bold text-lg">{product?.name || lead.productType}</div>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <MapPin className="h-3 w-3 mr-1" /> {lead.city} ({lead.zipCode})
+              return (
+                <motion.div
+                  key={lead.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                >
+                  <Card className={`relative overflow-hidden border-border/50 bg-background/50 hover:border-primary/50 transition-all ${isReservedByMe ? "ring-2 ring-primary" : ""}`}>
+                    {ultraFresh && (
+                      <div className="absolute top-0 right-0">
+                        <div className="bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
+                          Ultra-Frais
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Lead Attributes Preview */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {Object.entries(lead.attributes as Record<string, any>).slice(0, 3).map(([key, value]) => (
-                        <span key={key} className="text-[10px] bg-secondary px-2 py-0.5 rounded">
-                          {typeof value === "number" && value > 1000
-                            ? `${(value / 1000).toFixed(0)}k€`
-                            : String(value)}
-                        </span>
-                      ))}
-                    </div>
+                    {lead.isAppointment && (
+                      <div className="absolute top-0 left-0">
+                        <div className="bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg uppercase tracking-wider flex items-center gap-1">
+                          <Calendar className="h-3 w-3" /> RDV
+                        </div>
+                      </div>
+                    )}
 
-                    <div className="space-y-2 mb-6">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Fraîcheur</span>
-                        <span className={`font-medium flex items-center gap-1 ${ultraFresh ? "text-green-500" : ""}`}>
-                          <Clock className="h-3 w-3" /> {freshness}
-                        </span>
+                    <CardContent className="p-6 pt-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          {product ? <product.icon className="h-6 w-6" /> : <Euro className="h-6 w-6" />}
+                        </div>
+                        <div>
+                          <div className="font-bold text-lg">{product?.name || lead.productType}</div>
+                          <div className="flex items-center text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3 mr-1" /> {lead.city} ({lead.zipCode})
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Consentement</span>
-                        <span className="text-green-500 font-semibold flex items-center gap-1">
-                          <ShieldCheck className="h-3 w-3" /> Vérifié
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between border-t border-border/50 pt-4">
-                      <div>
-                        <div className="text-xs text-muted-foreground">Prix</div>
-                        <div className="text-2xl font-bold">{lead.price} €</div>
+                      <div className="space-y-2 mb-6">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Fraîcheur</span>
+                          <span className={`font-medium flex items-center gap-1 ${ultraFresh ? "text-green-500" : ""}`}>
+                            <Clock className="h-3 w-3" /> {freshness}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Consentement</span>
+                          <span className="text-green-500 font-semibold flex items-center gap-1">
+                            <ShieldCheck className="h-3 w-3" /> Vérifié
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Type</span>
+                          <span className="text-foreground font-medium">{lead.isExclusive ? "Exclusif" : "Mutualisé"}</span>
+                        </div>
                       </div>
-                      <Button
-                        onClick={() => handleBuyClick(lead)}
-                        disabled={!!reservedLead}
-                        className="rounded-full px-6"
-                      >
-                        Acheter
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
+
+                      <div className="flex items-center justify-between border-t border-border/50 pt-4">
+                        <div>
+                          <div className="text-xs text-muted-foreground">Prix</div>
+                          <div className="text-2xl font-bold">{lead.price.toFixed(2)} €</div>
+                        </div>
+                        <Button
+                          onClick={() => handleBuyClick(lead)}
+                          disabled={!!reservedLead}
+                          className="rounded-full px-6"
+                        >
+                          Acheter
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })
+          )}
         </AnimatePresence>
       </div>
 
-      {filteredLeads.length === 0 && (
+      {!loading && filteredLeads.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           Aucun lead disponible avec ces critères. Modifiez vos filtres ou revenez plus tard.
         </div>
@@ -285,7 +334,7 @@ export default function MarketplacePage() {
               <DialogHeader>
                 <DialogTitle>Finaliser l'achat</DialogTitle>
                 <DialogDescription>
-                  Lead réservé pendant <span className="text-primary font-bold">{formatTime(timeLeft)}</span>
+                  Prix du lead: <span className="font-bold text-foreground">{selectedLeadForPurchase?.price.toFixed(2)} €</span>
                 </DialogDescription>
               </DialogHeader>
 
@@ -307,23 +356,23 @@ export default function MarketplacePage() {
                     </div>
                   </div>
 
-                  {/* Price */}
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground">Montant à débiter</p>
-                    <p className="text-4xl font-bold">{selectedLeadForPurchase.price.toFixed(2)} €</p>
-                  </div>
-
                   {/* Balance */}
                   <div className="space-y-2 bg-secondary/30 p-4 rounded-xl">
                     <div className="flex justify-between text-sm">
                       <span>Crédits actuels</span>
-                      <span>{userCredits.toFixed(2)} €</span>
+                      <span>{userProfile?.credits?.toFixed(2)} €</span>
                     </div>
-                    <div className="flex justify-between text-sm text-primary font-bold">
+                    <div className={`flex justify-between text-sm font-bold ${userProfile?.credits < selectedLeadForPurchase.price ? "text-destructive" : "text-primary"}`}>
                       <span>Solde après achat</span>
-                      <span>{(userCredits - selectedLeadForPurchase.price).toFixed(2)} €</span>
+                      <span>{(userProfile?.credits - selectedLeadForPurchase.price).toFixed(2)} €</span>
                     </div>
                   </div>
+
+                  {userProfile?.credits < selectedLeadForPurchase.price && (
+                    <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-xs font-medium">
+                      Crédits insuffisants. Veuillez recharger votre compte.
+                    </div>
+                  )}
 
                   {/* Warning */}
                   <div className="flex items-start gap-2 text-amber-500 bg-amber-500/10 p-3 rounded-lg text-xs">
@@ -335,7 +384,11 @@ export default function MarketplacePage() {
 
               <DialogFooter>
                 <Button variant="outline" onClick={handleCancelReservation}>Annuler</Button>
-                <Button onClick={handleConfirmPurchase}>
+                <Button
+                  onClick={handleConfirmPurchase}
+                  disabled={purchasing || (userProfile?.credits < (selectedLeadForPurchase?.price || 0))}
+                >
+                  {purchasing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Confirmer l'achat
                 </Button>
               </DialogFooter>
@@ -355,19 +408,19 @@ export default function MarketplacePage() {
                   Le lead a été ajouté à votre espace. Vous pouvez maintenant contacter le prospect.
                 </p>
 
-                {selectedLeadForPurchase && (
+                {boughtLeadDetails && (
                   <div className="w-full p-4 bg-secondary/30 rounded-xl space-y-2 mt-4">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Nom</span>
-                      <span className="font-bold">{selectedLeadForPurchase.firstName} {selectedLeadForPurchase.lastName}</span>
+                      <span className="font-bold">{boughtLeadDetails.firstName} {boughtLeadDetails.lastName}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Téléphone</span>
-                      <span className="font-bold">{selectedLeadForPurchase.phone}</span>
+                      <span className="font-bold">{boughtLeadDetails.phone}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Email</span>
-                      <span className="font-bold">{selectedLeadForPurchase.email}</span>
+                      <span className="font-bold">{boughtLeadDetails.email}</span>
                     </div>
                   </div>
                 )}
@@ -384,3 +437,4 @@ export default function MarketplacePage() {
     </div>
   );
 }
+

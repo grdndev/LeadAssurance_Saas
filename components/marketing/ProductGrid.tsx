@@ -1,16 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  Home, 
-  Car, 
-  HeartPulse, 
-  Briefcase, 
-  Building2, 
-  ShieldCheck, 
-  Dog, 
-  Construction, 
-  TrendingUp, 
+import {
+  Home,
+  Car,
+  HeartPulse,
+  Briefcase,
+  Building2,
+  ShieldCheck,
+  Dog,
+  Construction,
+  TrendingUp,
   PiggyBank,
   Users,
   HardHat,
@@ -53,14 +53,14 @@ export function ProductGrid() {
             18 types de Leads & RDV Qualifiés
           </p>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Des formulaires courts pour maximiser l'intention de conversion sans friction. 
+            Des formulaires courts pour maximiser l'intention de conversion sans friction.
             Disponible à l'achat immédiat ou en flux récurrent.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-          <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-3">
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product, idx) => (
-              <motion.div 
+              <motion.div
                 key={product.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

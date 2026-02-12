@@ -6,35 +6,70 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
+
+
 
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  password      String?
   name          String?
-  role          Role      @default(BROKER)
-  credits       Int       @default(0)
+  role          String    @default("BROKER") // BROKER, PROVIDER, ADMIN
+  credits       Float     @default(0)
   
   // Relations
   leadsCreated  Lead[]    @relation("SourceProvider")
   leadsBought   Lead[]    @relation("BuyerBroker")
   reservations  MarketplaceReservation[]
+  transactions  Transaction[]
   
+  // NextAuth
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
-enum Role {
-  ADMIN
-  PROVIDER
-  BROKER
+// NextAuth Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
   id              String         @id @default(cuid())
-  productType     ProductType
-  status          LeadStatus     @default(STOCK)
+  productType     String         // Enum became String for SQLite
+  status          String         @default("PENDING_APPROVAL") // PENDING_APPROVAL, STOCK, SOLD, DISPUTED, REJECTED
+  
+  // Lead Type (LEAD or APPOINTMENT)
+  leadType        String         @default("LEAD") // LEAD, APPOINTMENT
   
   // Basic Info
   firstName       String
@@ -45,10 +80,17 @@ model Lead {
   city            String
   
   // Dynamic Attributes
-  attributes      Json           // Specific fields for the 18 products
+  attributes      String         // JSON stringified for SQLite (no native JSON)
+  
+  // Appointment-specific fields (only for leadType = APPOINTMENT)
+  appointmentDate     DateTime?
+  appointmentChannel  String?      // PHONE, VISIO
+  appointmentStatus   String?      // PENDING, CONFIRMED, CANCELLED
+  availabilities      String?      // JSON stringified available slots
+  confirmationSentAt  DateTime?
   
   // Options
-  isAppointment   Boolean        @default(false)
+  isAppointment   Boolean        @default(false) // DEPRECATED: use leadType instead
   isExclusive     Boolean        @default(true)
   price           Float
   
@@ -62,6 +104,7 @@ model Lead {
   broker          User?          @relation("BuyerBroker", fields: [brokerId], references: [id])
   
   reservation     MarketplaceReservation?
+  disputes        Dispute[]
   
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -96,30 +139,31 @@ model MarketplaceReservation {
   @@index([expiresAt])
 }
 
-enum LeadStatus {
-  STOCK
-  RESERVED
-  SOLD
-  REJECTED
+model Dispute {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id])
+  brokerId    String
+  reason      String
+  description String?
+  status      String   @default("OPEN") // OPEN, RESOLVED_REFUNDED, RESOLVED_REJECTED
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([status])
 }
 
-enum ProductType {
-  CREDIT_IMMO
-  RACHAT_CREDIT
-  CREDIT_PRO
-  ASSURANCE_EMPRUNTEUR
-  MUTUELLE_SANTE_IND
-  MUTUELLE_ENTREPRISE
-  PREVOYANCE_TNS
-  ASSURANCE_AUTO
-  ASSURANCE_MRH
-  ASSURANCE_CHIEN_CHAT
-  RC_PRO
-  MULTIRISQUE_PRO
-  RC_DECENNALE
-  DOMMAGE_OUVRAGE
-  MULTIRISQUE_IMMEUBLE
-  ASSURANCE_OBSEQUES
-  ASSURANCE_VIE_RETRAITE
-  DEFISCALISATION
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // CREDIT_PURCHASE, LEAD_PURCHASE, LEAD_SALE, REFUND
+  amount      Float
+  credits     Float
+  description String
+  stripeId    String?  // For Stripe payment tracking
+  
+  createdAt   DateTime @default(now())
 }
