@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                 data: {
                     userId: broker.id,
                     type: "LEAD_PURCHASE",
-                    amount: 0,
+                    amount: lead.price, // Changed from 0 to lead.price for proper tracking
                     credits: lead.price,
                     description: `Achat lead ${lead.productType} #${lead.id}`,
                 }

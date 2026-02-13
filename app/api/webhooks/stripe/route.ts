@@ -28,28 +28,37 @@ export async function POST(req: Request) {
         const credits = parseFloat(session.metadata?.credits || "0");
         const amountHT = (session.amount_total || 0) / 100 / 1.2; // Assuming 20% VAT for now
 
+        console.log(`Webhook received: userId=${userId}, credits=${credits}, amountHT=${amountHT}`);
+
         if (userId && credits > 0) {
-            await prisma.$transaction([
-                prisma.user.update({
-                    where: { id: userId },
-                    data: {
-                        credits: {
-                            increment: credits,
+            try {
+                await prisma.$transaction([
+                    prisma.user.update({
+                        where: { id: userId },
+                        data: {
+                            credits: {
+                                increment: credits,
+                            },
                         },
-                    },
-                }),
-                prisma.transaction.create({
-                    data: {
-                        userId: userId,
-                        type: "CREDIT_PURCHASE",
-                        amount: amountHT,
-                        credits: credits,
-                        description: `Recharge de ${credits} crédits`,
-                        stripeId: session.id,
-                    },
-                }),
-            ]);
-            console.log(`Credits and Transaction updated for user ${userId}: ${credits} credits`);
+                    }),
+                    prisma.transaction.create({
+                        data: {
+                            userId: userId,
+                            type: "CREDIT_PURCHASE",
+                            amount: amountHT,
+                            credits: credits,
+                            description: `Recharge de ${credits} crédits`,
+                            stripeId: session.id,
+                        },
+                    }),
+                ]);
+                console.log(`✅ Credits and Transaction updated for user ${userId}: ${credits} credits`);
+            } catch (error) {
+                console.error(`❌ Failed to update credits for user ${userId}:`, error);
+                return NextResponse.json({ error: "Database update failed" }, { status: 500 });
+            }
+        } else {
+            console.warn(`⚠️ Invalid webhook data: userId=${userId}, credits=${credits}`);
         }
     }
 

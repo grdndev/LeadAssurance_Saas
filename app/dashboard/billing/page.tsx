@@ -43,6 +43,9 @@ export default function BillingPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [userProfile, setUserProfile] = useState<any>(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [transactions, setTransactions] = useState<any[]>([]);
+    const [loadingData, setLoadingData] = useState(true);
 
     const fetchProfile = async () => {
         setLoadingProfile(true);
@@ -57,13 +60,39 @@ export default function BillingPage() {
         }
     };
 
+    const fetchData = async () => {
+        setLoadingData(true);
+        try {
+            const [statsRes, historyRes] = await Promise.all([
+                fetch("/api/billing/stats"),
+                fetch("/api/billing/history")
+            ]);
+            
+            const statsData = await statsRes.json();
+            const historyData = await historyRes.json();
+            
+            setStats(statsData);
+            setTransactions(historyData.transactions || []);
+        } catch (err) {
+            console.error("Fetch data error:", err);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
     useEffect(() => {
         fetchProfile();
+        fetchData();
 
         // Handle success/cancel from Stripe
         const status = searchParams.get("status");
         if (status === "success") {
             toast.success("Paiement réussi ! Vos crédits ont été ajoutés.");
+            // Refresh data after successful payment
+            setTimeout(() => {
+                fetchProfile();
+                fetchData();
+            }, 1000);
         } else if (status === "cancel") {
             toast.error("Paiement annulé.");
         }
@@ -148,8 +177,14 @@ export default function BillingPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-4xl font-bold italic opacity-50">En calcul...</div>
-                            <p className="text-xs text-muted-foreground mt-2">Suivi automatique des achats</p>
+                            {loadingData ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            ) : (
+                                <>
+                                    <div className="text-4xl font-bold">{stats?.monthlyUsage?.toFixed(2) || "0.00"} €</div>
+                                    <p className="text-xs text-muted-foreground mt-2">Dépenses ce mois-ci</p>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -166,8 +201,14 @@ export default function BillingPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-4xl font-bold italic opacity-50">-- €</div>
-                            <p className="text-xs text-muted-foreground mt-2">Dépenses depuis l'inscription</p>
+                            {loadingData ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            ) : (
+                                <>
+                                    <div className="text-4xl font-bold">{stats?.totalBudget?.toFixed(2) || "0.00"} €</div>
+                                    <p className="text-xs text-muted-foreground mt-2">Dépenses depuis l'inscription</p>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -220,16 +261,77 @@ export default function BillingPage() {
             </Card>
 
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Transaction History (Mock for now or simple list) */}
+                {/* Transaction History */}
                 <Card className="border-border/50 bg-background/50 h-full">
                     <CardHeader>
                         <CardTitle>Historique</CardTitle>
                         <CardDescription>Flux de crédit récent</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-center py-10 text-muted-foreground italic">
-                            Les transactions s'afficheront ici après vos premiers achats.
-                        </div>
+                        {loadingData ? (
+                            <div className="flex justify-center py-10">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : transactions.length === 0 ? (
+                            <div className="text-center py-10 text-muted-foreground italic">
+                                Les transactions s'afficheront ici après vos premiers achats.
+                            </div>
+                        ) : (
+                            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                                {transactions.slice(0, 20).map((transaction) => {
+                                    const isCreditPurchase = transaction.type === "CREDIT_PURCHASE";
+                                    const isLeadSale = transaction.type === "LEAD_SALE";
+                                    const isLeadPurchase = transaction.type === "LEAD_PURCHASE";
+                                    
+                                    return (
+                                        <div
+                                            key={transaction.id}
+                                            className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-secondary/20 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {isCreditPurchase && (
+                                                    <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                                                        <Plus className="h-5 w-5 text-green-500" />
+                                                    </div>
+                                                )}
+                                                {isLeadPurchase && (
+                                                    <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                                                        <Euro className="h-5 w-5 text-orange-500" />
+                                                    </div>
+                                                )}
+                                                {isLeadSale && (
+                                                    <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                                        <TrendingUp className="h-5 w-5 text-blue-500" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className="font-medium">
+                                                        {isCreditPurchase && "Recharge de crédits"}
+                                                        {isLeadPurchase && "Achat de lead"}
+                                                        {isLeadSale && "Vente de lead"}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {new Date(transaction.createdAt).toLocaleDateString("fr-FR", {
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                            year: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit"
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className={`text-lg font-bold ${
+                                                isCreditPurchase || isLeadSale ? "text-green-500" : "text-orange-500"
+                                            }`}>
+                                                {isCreditPurchase || isLeadSale ? "+" : "-"}
+                                                {(transaction.credits || transaction.amount).toFixed(2)} €
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -240,9 +342,57 @@ export default function BillingPage() {
                         <CardDescription>Téléchargez vos reçus fiscaux</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-center py-10 text-muted-foreground italic">
-                            Aucune facture générée pour le moment.
-                        </div>
+                        {loadingData ? (
+                            <div className="flex justify-center py-10">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : transactions.filter(t => t.type === "CREDIT_PURCHASE").length === 0 ? (
+                            <div className="text-center py-10 text-muted-foreground italic">
+                                Aucune facture générée pour le moment.
+                            </div>
+                        ) : (
+                            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                                {transactions
+                                    .filter(t => t.type === "CREDIT_PURCHASE")
+                                    .slice(0, 10)
+                                    .map((transaction) => (
+                                        <div
+                                            key={transaction.id}
+                                            className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-secondary/20 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <Receipt className="h-5 w-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium">
+                                                        Facture #{transaction.id.slice(0, 8)}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {new Date(transaction.createdAt).toLocaleDateString("fr-FR", {
+                                                            day: "2-digit",
+                                                            month: "long",
+                                                            year: "numeric"
+                                                        })}
+                                                    </div>
+                                                    <div className="text-xs font-semibold text-foreground mt-1">
+                                                        {transaction.credits?.toFixed(2)} € HT
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="rounded-full"
+                                                onClick={() => window.open(`/api/billing/invoice/${transaction.id}`, "_blank")}
+                                            >
+                                                <Download className="h-4 w-4 mr-2" />
+                                                PDF
+                                            </Button>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

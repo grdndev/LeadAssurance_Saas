@@ -16,7 +16,6 @@ export async function GET() {
         const transactions = await prisma.transaction.findMany({
             where: {
                 userId,
-                type: "CREDIT_PURCHASE"
             },
             orderBy: { createdAt: "desc" }
         });

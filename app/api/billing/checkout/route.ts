@@ -42,7 +42,7 @@ export async function POST(req: Request) {
             cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/billing?canceled=true`,
             metadata: {
                 userId: (session.user as any).id,
-                amount: amount.toString(),
+                credits: amount.toString(), // Changed from 'amount' to 'credits'
             },
         });
 
