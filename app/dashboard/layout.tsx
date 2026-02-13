@@ -29,11 +29,26 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   // Determine if it's a provider or broker dashboard based on URL
   const isProvider = pathname?.includes("/provider");
   const userRole = (session?.user as any)?.role;
+  
+  // Check if on marketplace and not authenticated
+  const isMarketplace = pathname === "/dashboard/marketplace";
+  const isAuthenticated = status === "authenticated";
+  
+  // If on marketplace and not authenticated, show simplified layout
+  if (isMarketplace && !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-secondary/30">
+        <main className="p-6 lg:p-10">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   const brokerNavigation = [
     { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },

@@ -11,7 +11,8 @@ import {
     ArrowUpRight,
     FileText,
     Euro,
-    Loader2
+    Loader2,
+    Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ import { toast } from "sonner";
 export default function ProviderDashboardPage() {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [generatingMock, setGeneratingMock] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,6 +42,30 @@ export default function ProviderDashboardPage() {
         };
         fetchData();
     }, []);
+
+    const handleGenerateMockData = async () => {
+        setGeneratingMock(true);
+        try {
+            const res = await fetch("/api/mock-data", {
+                method: "POST",
+            });
+            if (res.ok) {
+                toast.success("Données de test générées avec succès !");
+                // Refresh data
+                const statsRes = await fetch("/api/user/provider/stats");
+                if (statsRes.ok) {
+                    const result = await statsRes.json();
+                    setData(result);
+                }
+            } else {
+                toast.error("Erreur lors de la génération des données");
+            }
+        } catch (error) {
+            toast.error("Erreur serveur");
+        } finally {
+            setGeneratingMock(false);
+        }
+    };
 
     const statusConfig = {
         STOCK: { label: "En Stock", color: "text-blue-500 bg-blue-500/10" },
@@ -73,11 +99,26 @@ export default function ProviderDashboardPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Espace Apporteur</h1>
                     <p className="text-muted-foreground">Gérez vos leads et suivez vos performances.</p>
                 </div>
-                <Link href="/dashboard/provider/submit">
-                    <Button className="rounded-full px-6 bg-primary hover:bg-primary/90">
-                        <Upload className="h-4 w-4 mr-2" /> Envoyer un Lead
+                <div className="flex gap-3">
+                    <Button 
+                        variant="outline" 
+                        onClick={handleGenerateMockData} 
+                        disabled={generatingMock}
+                        className="rounded-full px-6"
+                    >
+                        {generatingMock ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                            <Sparkles className="h-4 w-4 mr-2" />
+                        )}
+                        Générer données test
                     </Button>
-                </Link>
+                    <Link href="/dashboard/provider/submit">
+                        <Button className="rounded-full px-6 bg-primary hover:bg-primary/90">
+                            <Upload className="h-4 w-4 mr-2" /> Envoyer un Lead
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Stats */}
@@ -174,7 +215,7 @@ export default function ProviderDashboardPage() {
 
                         <div className="pt-4 border-t border-border/50">
                             <div className="text-center">
-                                <div className="text-3xl font-bold text-primary">{stats.earnings.toLocaleString()} €</div>
+                                <div className="text-3xl font-bold text-primary">{(stats.earnings || 0).toLocaleString()} €</div>
                                 <div className="text-xs text-muted-foreground mt-1">Revenus cumulés</div>
                             </div>
                         </div>

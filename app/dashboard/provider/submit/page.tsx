@@ -32,6 +32,7 @@ export default function SubmitLeadPage() {
       phone: "",
       zipCode: "",
       city: "",
+      price: "",
       isAppointment: false,
       attributes: {} as any,
     }
@@ -51,7 +52,7 @@ export default function SubmitLeadPage() {
           productType: selectedProduct,
           consentText: "Le prospect a donné son consentement explicite pour être recontacté.",
           urlSource: window.location.href,
-          price: product?.basePrice || 25.0,
+          price: data.price ? parseFloat(data.price) : (product?.basePrice || 25.0),
         }),
       });
 
@@ -137,6 +138,18 @@ export default function SubmitLeadPage() {
                     </Select>
                   )}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Prix de vente (€)</Label>
+                <Input
+                  {...register("price")}
+                  type="number"
+                  step="0.01"
+                  placeholder={product?.basePrice ? `${product.basePrice.toFixed(2)}` : "25.00"}
+                  className="rounded-full"
+                />
+                <p className="text-xs text-muted-foreground">Prix suggéré: {product?.basePrice ? `${product.basePrice.toFixed(2)}€` : "25.00€"}</p>
               </div>
 
               <div className="space-y-2">

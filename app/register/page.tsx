@@ -179,6 +179,7 @@ export default function RegisterPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
                   className="rounded-full pr-10"
                   value={formData.password}
                   onChange={handleInputChange}

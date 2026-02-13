@@ -105,6 +105,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
                   className="rounded-full pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

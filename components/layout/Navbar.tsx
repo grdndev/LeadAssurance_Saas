@@ -55,6 +55,9 @@ export function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/dashboard/marketplace" className="transition-colors hover:text-foreground/80 text-foreground/60">
+                Salle de Marché
+              </Link>
               <Link href="/#produits" className="transition-colors hover:text-foreground/80 text-foreground/60">
                 Produits
               </Link>

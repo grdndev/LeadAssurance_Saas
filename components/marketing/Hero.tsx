@@ -4,8 +4,13 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Zap, BarChart3 } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export function Hero() {
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
+  const userRole = session?.user?.role;
+
   return (
     <div className="relative isolate overflow-hidden">
       {/* Background Gradients */}
@@ -39,14 +44,14 @@ export function Hero() {
               Accédez instantanément à la preuve de consentement pour chaque opportunité.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-x-6">
-              <Link href="/register" className="w-full sm:w-auto">
+              <Link href={isLoggedIn ? (userRole === "BROKER" ? "/dashboard" : "/dashboard/provider") : "/register"} className="w-full sm:w-auto">
                 <Button size="lg" className="w-full rounded-full px-8">
-                  Espace Courtier <ArrowRight className="ml-2 h-4 w-4" />
+                  {isLoggedIn ? "Mon Espace" : "Espace Courtier"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/register" className="w-full sm:w-auto">
+              <Link href={isLoggedIn ? "/dashboard/marketplace" : "/register"} className="w-full sm:w-auto">
                 <Button variant="ghost" size="lg" className="w-full rounded-full">
-                  Devenir Apporteur
+                  {isLoggedIn ? "Salle de Marché" : "Devenir Apporteur"}
                 </Button>
               </Link>
             </div>

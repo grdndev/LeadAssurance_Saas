@@ -60,14 +60,16 @@ export default function MarketplacePage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [leadsRes, profileRes] = await Promise.all([
-        fetch("/api/marketplace/leads"),
-        fetch("/api/user/profile")
-      ]);
+      const leadsRes = await fetch("/api/marketplace/leads");
       const leadsData = await leadsRes.json();
-      const profileData = await profileRes.json();
-      setLeads(leadsData);
-      setUserProfile(profileData);
+      setLeads(leadsData.leads || []);
+      
+      // Only fetch profile if authenticated
+      if (status === "authenticated") {
+        const profileRes = await fetch("/api/user/profile");
+        const profileData = await profileRes.json();
+        setUserProfile(profileData);
+      }
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -76,13 +78,8 @@ export default function MarketplacePage() {
   };
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-      return;
-    }
-    if (status === "authenticated") {
-      fetchData();
-    }
+    // Allow both authenticated and unauthenticated users to view
+    fetchData();
   }, [status]);
 
   useEffect(() => {
@@ -104,6 +101,12 @@ export default function MarketplacePage() {
   };
 
   const handleBuyClick = (lead: any) => {
+    // Redirect to login if not authenticated
+    if (status !== "authenticated") {
+      router.push("/login?redirect=/dashboard/marketplace");
+      return;
+    }
+    
     setSelectedLeadForPurchase(lead);
     setReservedLead(lead.id);
     setTimeLeft(600);
@@ -173,9 +176,11 @@ export default function MarketplacePage() {
           <p className="text-muted-foreground">Leads en stock disponibles à l'achat immédiat.</p>
         </div>
         <div className="flex items-center gap-4">
-          <Badge variant="outline" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
-            Crédit: {userProfile?.credits?.toFixed(2) || "0.00"} €
-          </Badge>
+          {status === "authenticated" && (
+            <Badge variant="outline" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
+              Crédit: {userProfile?.credits?.toFixed(2) || "0.00"} €
+            </Badge>
+          )}
           <Button variant="outline" size="sm" onClick={fetchData} className="rounded-full">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Actualiser
           </Button>

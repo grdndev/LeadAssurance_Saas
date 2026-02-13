@@ -45,6 +45,71 @@ const statusConfig = {
     PENDING: { label: "En validation", color: "bg-yellow-500", icon: Clock },
 };
 
+const translateAttributeKey = (key: string): string => {
+    const translations: Record<string, string> = {
+        // Personal Info
+        firstName: "Prénom",
+        lastName: "Nom",
+        phone: "Téléphone",
+        email: "Email",
+        zipCode: "Code postal",
+        city: "Ville",
+        address: "Adresse",
+        birthDate: "Date de naissance",
+        
+        // Status fields
+        status: "Statut",
+        amount: "Montant",
+        seniority: "Ancienneté",
+        usage: "Usage",
+        
+        // Vehicle Info
+        vehicleType: "Type de véhicule",
+        vehicleBrand: "Marque",
+        vehicleModel: "Modèle",
+        vehicleYear: "Année",
+        licensePlate: "Immatriculation",
+        
+        // Insurance Info
+        currentInsurer: "Assureur actuel",
+        contractEndDate: "Fin de contrat",
+        claimsHistory: "Historique sinistres",
+        driverLicense: "Permis de conduire",
+        
+        // Property Info
+        propertyType: "Type de bien",
+        propertySize: "Surface",
+        rooms: "Nombre de pièces",
+        constructionYear: "Année de construction",
+        ownershipStatus: "Statut occupation",
+        
+        // Professional Info
+        companyName: "Nom entreprise",
+        siret: "SIRET",
+        activity: "Activité",
+        employees: "Nombre d'employés",
+        turnover: "Chiffre d'affaires",
+        
+        // Credit Info
+        loanAmount: "Montant emprunté",
+        loanDuration: "Durée",
+        loanPurpose: "Objet du prêt",
+        monthlyIncome: "Revenus mensuels",
+        creditScore: "Score crédit",
+        
+        // Other
+        projectDescription: "Description projet",
+        budget: "Budget",
+        timeline: "Délai",
+        notes: "Notes",
+        consent: "Consentement",
+        consentDate: "Date consentement",
+        source: "Source",
+    };
+    
+    return translations[key] || key;
+};
+
 export default function ProviderLeadsPage() {
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -95,6 +160,7 @@ export default function ProviderLeadsPage() {
             email: lead.email,
             zipCode: lead.zipCode,
             city: lead.city,
+            price: lead.price,
         });
         setShowEditDialog(true);
     };
@@ -222,7 +288,7 @@ export default function ProviderLeadsPage() {
                                             </div>
 
                                             {/* Price & Revenue */}
-                                            <div className="flex items-center gap-6">
+                                            <div className="flex flex-wrap items-center gap-3">
                                                 <div className="text-right">
                                                     <div className="text-xs text-muted-foreground">Prix de vente</div>
                                                     <div className="font-bold">{lead.price.toFixed(2)}€</div>
@@ -233,7 +299,7 @@ export default function ProviderLeadsPage() {
                                                         <div className="font-bold text-green-500">+{providerRevenue.toFixed(2)}€</div>
                                                     </div>
                                                 )}
-                                                {(lead.status === "PENDING" || lead.status === "PENDING_APPROVAL") && (
+                                                {(lead.status === "PENDING" || lead.status === "STOCK") && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
@@ -328,8 +394,8 @@ export default function ProviderLeadsPage() {
                                 <div className="grid grid-cols-1 gap-2">
                                     {Object.entries(JSON.parse(selectedLead.attributes)).map(([key, value]) => (
                                         <div key={key} className="flex justify-between border-b pb-1">
-                                            <span className="text-muted-foreground">{key}</span>
-                                            <span>{String(value)}</span>
+                                            <span className="text-muted-foreground">{translateAttributeKey(key)}</span>
+                                            <span className="font-medium">{String(value)}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -381,6 +447,16 @@ export default function ProviderLeadsPage() {
                             <Input
                                 value={editForm.email || ""}
                                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                className="rounded-full"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Prix de vente (€)</Label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                value={editForm.price || ""}
+                                onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) })}
                                 className="rounded-full"
                             />
                         </div>
