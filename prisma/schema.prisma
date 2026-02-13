@@ -7,9 +7,8 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = "file:./dev.db"
 }
-
-
 
 model User {
   id            String    @id @default(cuid())
@@ -18,13 +17,21 @@ model User {
   name          String?
   role          String    @default("BROKER") // BROKER, PROVIDER, ADMIN
   credits       Float     @default(0)
-  
+
+  // Profile fields
+  phone         String?
+  companyName   String?
+  siret         String?
+  orias         String?
+  address       String?
+
   // Relations
   leadsCreated  Lead[]    @relation("SourceProvider")
   leadsBought   Lead[]    @relation("BuyerBroker")
   reservations  MarketplaceReservation[]
   transactions  Transaction[]
-  
+  notifications Notification[]
+
   // NextAuth
   emailVerified DateTime?
   image         String?
@@ -67,10 +74,10 @@ model Lead {
   id              String         @id @default(cuid())
   productType     String         // Enum became String for SQLite
   status          String         @default("PENDING_APPROVAL") // PENDING_APPROVAL, STOCK, SOLD, DISPUTED, REJECTED
-  
+
   // Lead Type (LEAD or APPOINTMENT)
   leadType        String         @default("LEAD") // LEAD, APPOINTMENT
-  
+
   // Basic Info
   firstName       String
   lastName        String
@@ -78,34 +85,33 @@ model Lead {
   email           String
   zipCode         String
   city            String
-  
+
   // Dynamic Attributes
   attributes      String         // JSON stringified for SQLite (no native JSON)
-  
+
   // Appointment-specific fields (only for leadType = APPOINTMENT)
   appointmentDate     DateTime?
   appointmentChannel  String?      // PHONE, VISIO
   appointmentStatus   String?      // PENDING, CONFIRMED, CANCELLED
   availabilities      String?      // JSON stringified available slots
   confirmationSentAt  DateTime?
-  
+
   // Options
   isAppointment   Boolean        @default(false) // DEPRECATED: use leadType instead
   isExclusive     Boolean        @default(true)
   price           Float
-  
-  // Consent
+
   consent         Consent?
-  
+
   // Relations
   providerId      String
   provider        User           @relation("SourceProvider", fields: [providerId], references: [id])
   brokerId        String?
   broker          User?          @relation("BuyerBroker", fields: [brokerId], references: [id])
-  
+
   reservation     MarketplaceReservation?
   disputes        Dispute[]
-  
+
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -117,7 +123,7 @@ model Consent {
   id              String   @id @default(cuid())
   leadId          String   @unique
   lead            Lead     @relation(fields: [leadId], references: [id])
-  
+
   consentText     String
   ipAddress       String
   userAgent       String
@@ -132,7 +138,7 @@ model MarketplaceReservation {
   lead      Lead     @relation(fields: [leadId], references: [id])
   brokerId  String
   broker    User     @relation(fields: [brokerId], references: [id])
-  
+
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -147,7 +153,7 @@ model Dispute {
   reason      String
   description String?
   status      String   @default("OPEN") // OPEN, RESOLVED_REFUNDED, RESOLVED_REJECTED
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -164,6 +170,22 @@ model Transaction {
   credits     Float
   description String
   stripeId    String?  // For Stripe payment tracking
-  
+
   createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // LEAD_PURCHASED, LEAD_SOLD, CREDIT_LOW, DISPUTE_OPENED, LEAD_APPROVED, LEAD_REJECTED
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?  // Optional link to related resource
+
+  createdAt DateTime @default(now())
+  
+  @@index([userId, read])
+  @@index([createdAt])
 }

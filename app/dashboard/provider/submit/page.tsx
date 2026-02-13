@@ -51,7 +51,7 @@ export default function SubmitLeadPage() {
           productType: selectedProduct,
           consentText: "Le prospect a donné son consentement explicite pour être recontacté.",
           urlSource: window.location.href,
-          price: 25.0, // Dans un vrai système, cela pourrait venir du type de produit
+          price: product?.basePrice || 25.0,
         }),
       });
 

@@ -1,0 +1,38 @@
+solde non fonctionnel = paiement stripe 
+Bonton espace courtier renvoie vers connexion meme si connecté
+blog place holder
+pas de navigations dans la page blog
+profil en haut à droite ne renvoie pas au profil et ne fait rien  
+dans details des lead pour compte provider attributs sont en anglais
+ne peux pas set le prix du lead 
+ajouter placeholder dans mdp page connexion/register
+crash when switching between courtier and provider
+enlevé bouton basculé demo
+Cannot read properties of undefined (reading 'toLocaleString')
+app/dashboard/provider/page.tsx (177:98) @ ProviderDashboardPage
+
+
+  175 |                         <div className="pt-4 border-t border-border/50">
+  176 |                             <div className="text-center">
+> 177 |                                 <div className="text-3xl font-bold text-primary">{stats.earnings.toLocaleString()} €</div>
+      |                                                                                                  ^
+  178 |                                 <div className="text-xs text-muted-foreground mt-1">Revenus cumulés</div>
+  179 |                             </div>
+  180 |                         </div>
+Call Stack
+17
+
+Show 16 ignore-listed frame(s)
+ProviderDashboardPage
+app/dashboard/provider/page.tsx (177:98)
+
+impossible de modifier leads
+pouvoir voir salle des marché non connecté
+
+Favicon — still missing from public
+Stripe/balance — env keys are placeholders, needs real config
+i18n for lead attributes — attribute keys still in English in detail views
+Blog pages — still placeholder content
+Lead editing/price setting — provider lead edit form could be improved
+Server-side route protection — currently only client-side guards (no middleware.ts)
+Seed data — marketplace is empty without sample leads

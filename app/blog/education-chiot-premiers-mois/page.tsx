@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Dog, AlertTriangle, CheckCircle2, Shield, PawPrint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RelatedArticles } from "@/components/blog/RelatedArticles";
 
 export const metadata: Metadata = {
     title: "Éduquer un Chiot : Guide Complet des Premiers Mois | Blog LeadsAssurance",
@@ -407,6 +408,8 @@ export default function EducationChiotPage() {
                         </Link>
                     </div>
                 </div>
+
+                <RelatedArticles currentArticleId="education-chiot-premiers-mois" />
             </article>
         </div>
     );

@@ -4,6 +4,8 @@ import { ArrowLeft, Calendar, Clock, Dog, TrendingUp, Euro, FileCheck, Users } f
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+import { RelatedArticles } from "@/components/blog/RelatedArticles";
+
 export const metadata: Metadata = {
     title: "Comment Devenir Éducateur Canin Professionnel en France | Blog LeadsAssurance",
     description: "Formations, diplômes, démarches administratives et business model pour devenir éducateur canin en 2024. Guide complet : BPJEPS, salaire, assurance pro, statut juridique.",
@@ -415,6 +417,8 @@ export default function DevenirEducateurCaninPage() {
                         </Link>
                     </div>
                 </div>
+
+                <RelatedArticles currentArticleId="devenir-educateur-canin-professionnel" />
             </article>
         </div>
     );

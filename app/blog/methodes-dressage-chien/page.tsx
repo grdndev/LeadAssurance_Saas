@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Share2, Bookmark, Dog, Heart, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RelatedArticles } from "@/components/blog/RelatedArticles";
 
 export const metadata: Metadata = {
     title: "Méthodes de Dressage Canin : Éducation Positive ou Traditionnelle ? | Blog LeadsAssurance",
@@ -256,6 +257,8 @@ export default function MethodesDressageChienPage() {
                         </Link>
                     </div>
                 </div>
+
+                <RelatedArticles currentArticleId="methodes-dressage-chien" />
             </article>
         </div>
     );

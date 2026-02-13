@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { RelatedArticles } from "@/components/blog/RelatedArticles";
 
 export const metadata: Metadata = {
     title: "L'importance du dressage pour la sécurité de votre chien | Blog LeadsAssurance",
@@ -71,6 +72,8 @@ export default function ArticlePage() {
                     </button>
                 </div>
             </footer>
+
+            <RelatedArticles currentArticleId="importance-dressage-chien" />
         </article>
     );
 }

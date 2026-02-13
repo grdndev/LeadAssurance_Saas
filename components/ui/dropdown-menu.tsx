@@ -30,6 +30,7 @@ function DropdownMenuTrigger({
     />
   )
 }
+DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
 function DropdownMenuContent({
   className,

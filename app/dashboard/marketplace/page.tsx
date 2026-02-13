@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
@@ -39,6 +40,7 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function MarketplacePage() {
+  const { data: session, status } = useSession();
   const [leads, setLeads] = useState<any[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -74,8 +76,14 @@ export default function MarketplacePage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
+    }
+    if (status === "authenticated") {
+      fetchData();
+    }
+  }, [status]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -155,7 +163,7 @@ export default function MarketplacePage() {
   });
 
   // Get unique product types for filter
-  const availableProducts = [...new Set(leads.map(l => l.productType))];
+  const availableProducts = [...new Set((Array.isArray(leads) ? leads : []).map(l => l.productType))];
 
   return (
     <div className="space-y-8">
@@ -238,8 +246,8 @@ export default function MarketplacePage() {
             filteredLeads.map((lead) => {
               const product = getProductById(lead.productType);
               const isReservedByMe = reservedLead === lead.id;
-              const freshness = getLeadFreshness(lead.createdAt);
-              const ultraFresh = isUltraFresh(lead.createdAt);
+              const freshness = getLeadFreshness(new Date(lead.createdAt));
+              const ultraFresh = isUltraFresh(new Date(lead.createdAt));
 
               return (
                 <motion.div

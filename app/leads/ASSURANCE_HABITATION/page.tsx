@@ -34,7 +34,8 @@ export default function AssuranceHabitationPage() {
                 placeholder: "Ex: 75",
             },
             {
-                name: "rooms"        label: "Nombre de pièces",
+                name: "rooms",
+                label: "Nombre de pièces",
                 type: "select" as const,
                 required: true,
                 options: ["1", "2", "3", "4", "5 ou plus"],

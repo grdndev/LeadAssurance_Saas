@@ -12,7 +12,7 @@ import {
     Clock,
     Shield,
     AlertTriangle,
-    RefreshCw
+    RefreshCw,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -111,18 +111,17 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-6">
-            <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-                        <p className="text-muted-foreground">Gestion de la plateforme LeadsAssurance</p>
-                    </div>
-                    <Badge className="px-4 py-2 bg-primary text-primary-foreground">
-                        <Shield className="h-4 w-4 mr-2" />
-                        Administrateur
-                    </Badge>
+        <div className="max-w-7xl mx-auto space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+                    <p className="text-muted-foreground">Gestion de la plateforme LeadsAssurance</p>
                 </div>
+                <Badge className="px-4 py-2 bg-primary text-primary-foreground">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Administrateur
+                </Badge>
+            </div>
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -276,6 +275,5 @@ export default function AdminDashboard() {
                     </TabsContent>
                 </Tabs>
             </div>
-        </div>
     );
 }

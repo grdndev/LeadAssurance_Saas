@@ -1,0 +1,211 @@
+1
+LeadsAssurance.com
+CAHIER DES CHARGES FONCTIONNEL
+leadsassurance.com
+Plateforme de vente de leads & rendez-vous qualifiés
+Assurance & Crédit
+1. VISION & OBJECTIFS
+LeadsAssurance.com permet aux courtiers de :
+• acheter des leads qualifiés
+• acheter des rendez-vous qualifiés
+• acheter des leads à l’un + un achat à l’unité via la salle de marché
+• accéder à une preuve de consentement sur chaque lead/RDV
+Principes :
+• simplicité maximale côté courtier
+• transparence des prix
+• fraîcheur en 24h / 48h / 72h ouvrées
+• conformité RGPD native
+2. CATALOGUE PRODUITS OFFICIEL (VERSION CONSOLIDÉE)
+CRÉDIT
+1. Crédit immobilier
+2. Rachat / regroupement de crédits
+3. Crédit professionnel
+ASSURANCE
+4. Assurance emprunteur
+5. Mutuelle santé individuelle
+6. Mutuelle d’entreprise
+7. Prévoyance TNS / dirigeants
+8. Assurance auto
+2
+LeadsAssurance.com
+9. Assurance habitation (MRH)
+10.Assurance chiens & chats
+11.RC Pro
+12.Multirisque professionnelle
+13.RC Décennale
+14.Dommage Ouvrage
+15.Multirisque Immeuble
+16.Assurance obsèques
+ÉPARGNE / RETRAITE / PATRIMOINE
+17.Assurance vie & retraite (PER / épargne)
+18.Défiscalisation (leads patrimoniaux)
+Chaque produit peut être vendu en Lead qualifié et, quand pertinent, en RDV qualifié
+(notamment crédit, emprunteur, pro, obsèques, vie/retraite, défiscalisation).
+3. CHAMPS COMMUNS OBLIGATOIRES (TOUS LES PRODUITS)
+3.1 Identité & contact
+• Prénom
+• Nom
+• Téléphone
+• Email
+• Code postal
+• Ville
+3.2 Consentement (obligatoire)
+• Case à cocher non pré-cochée (ou consentement oral si call center)
+• Texte de consentement versionné
+• Horodatage
+• IP publique
+• User-agent
+3
+LeadsAssurance.com
+• URL source
+4. CHAMPS OBLIGATOIRES PAR PRODUIT (FORMULAIRES)
+Tous les formulaires restent courts : le but est de capter l’intention sans créer de
+friction.
+Les champs ci-dessous sont le minimum obligatoire.
+4.1 CRÉDIT IMMOBILIER
+• Type de projet (résidence principale / locatif)
+• Montant du projet
+• Apport (oui/non)
+• Situation professionnelle
+• Revenus mensuels nets
+• Délai du projet (immédiat / <6 mois / >6 mois)
+4.2 RACHAT / REGROUPEMENT DE CRÉDITS
+• Propriétaire (oui / non)
+• Nombre de crédits en cours
+• Montant total des mensualités actuelles
+• Montant total restant à rembourser
+• Situation Familiale :( Célibataire, Marié(e), Divorcé(e), Veuf(ve), Union libre)
+• Situation professionnelle : (Fonctionnaire, Profession Libérale, Chef d’entreprise,
+Salarié€ du privé, Artisan Commerçant, Retraité(e) , Sans emploi, Autre
+• Revenus mensuels
+4.3 CRÉDIT PROFESSIONNEL
+• Statut (création / entreprise existante)
+• Type d’activité
+• Montant recherché
+4
+LeadsAssurance.com
+• Usage (matériel / trésorerie / local)
+• Ancienneté entreprise (si existante)
+4.4 ASSURANCE EMPRUNTEUR
+• Type de demande (changement / nouveau prêt)
+• Date de signature du prêt
+• Montant du prêt
+• Âge
+• Fumeur (oui/non)
+4.5 MUTUELLE SANTÉ INDIVIDUELLE
+• Nombre de personnes à couvrir
+• Âge du/des assurés
+• Régime (salarié / TNS / retraité)
+• Priorité (optique / dentaire / hospitalisation)
+4.6 MUTUELLE D’ENTREPRISE
+• Nombre de salariés
+• Secteur d’activité
+• Convention collective (si connue)
+• Date souhaitée de mise en place
+4.7 PRÉVOYANCE TNS / DIRIGEANTS
+• Statut (TNS / dirigeant)
+• Activité
+• Revenus annuels
+• Objectif (maintien de revenus / famille)
+5
+LeadsAssurance.com
+4.8 ASSURANCE AUTO
+• Type de véhicule
+• Usage (privé / pro)
+• Bonus/malus
+• Date d’échéance
+4.9 ASSURANCE HABITATION (MRH)
+• Statut (locataire / propriétaire)
+• Type logement (appartement / maison)
+• Surface
+• Date d’échéance
+4.10 ASSURANCE CHIENS & CHATS
+• Type animal (chien / chat)
+• Race (ou croisé)
+• Âge
+• Identifié (oui/non)
+4.11 RC PRO
+• Activité
+• Statut juridique
+• Chiffre d’affaires annuel
+• Date de création
+4.12 MULTIRISQUE PROFESSIONNELLE
+• Activité
+• Surface des locaux
+• Valeur matériel (approx.)
+6
+LeadsAssurance.com
+• Statut (locataire / propriétaire)
+4.13 RC DÉCENNALE
+• Corps de métier
+• Date création entreprise
+• Chiffre d’affaires
+• Zone d’intervention (départements)
+4.14 DOMMAGE OUVRAGE
+• Type projet (construction / rénovation)
+• Montant travaux
+• Maître d’ouvrage (particulier / pro)
+• Date démarrage travaux
+4.15 MULTIRISQUE IMMEUBLE
+• Type immeuble (copropriété / mono-propriété)
+• Nombre de lots
+• Usage (habitation / mixte)
+• Valeur estimée (tranche)
+4.16 ASSURANCE OBSÈQUES
+• Âge de l’assuré
+• Type de contrat souhaité (capital / prestations) (si tu veux rester ultra simple, tu
+peux mettre “Je ne sais pas”)
+• Budget mensuel (tranches)
+• Souhait de contacter rapidement (oui/non)
+Variante encore plus simple (si besoin) : âge + budget + rappel.
+7
+LeadsAssurance.com
+4.17 ASSURANCE VIE & RETRAITE (PER / ÉPARGNE)
+• Objectif principal (épargne / préparer retraite / transmission)
+• Montant à investir (tranches)
+• Versement (ponctuel / mensuel)
+• Horizon (1–3 ans / 3–8 ans / 8+ ans)
+4.18 DÉFISCALISATION (LEADS PATRIMONIAUX)
+• Objectif (réduire impôts / préparer retraite / investissement immobilier)
+• Montant d’impôt annuel (tranches) (ou “je ne sais pas”)
+• Capacité d’investissement (tranches)
+• Horizon (court / moyen / long)
+5. RDV QUALIFIÉS (CPRDV)
+Champs supplémentaires obligatoires
+• Disponibilités prospect (créneaux)
+• Canal (téléphone / visio)
+• Confirmation RDV (SMS/email)
+• Consentement renforcé (transmission + RDV)
+6. SALLE DE MARCHÉ
+• Mise en stock des leads non vendus en exclusif
+• Achat à l’unité
+• Paiement crédits ou CB
+• Réservation courte pendant paiement
+• Infos visibles avant achat : produit, zone, fraîcheur ouvrée, prix, consentement ✔
+7. ESPACE COURTIER
+• Tableau de bord
+8
+LeadsAssurance.com
+• Leads/RDV
+• Salle de marché
+• Fiches détaillées avec preuve de consentement (export PDF)
+• Factures & crédits
+• Statuts (contacté / vendu / perdu) + motif optionnel
+8. ESPACE APPORTEUR
+• Envoi leads (manuel / CSV / API)
+• Consentement obligatoire
+• Rejet automatique si non conforme
+• Reporting (acceptés/refusés + motifs)
+9. CONFORMITÉ & CONSENTEMENT
+• Consentement explicite obligatoire
+• Objet consentement lié à chaque lead/RDV
+• Preuve consultable sur chaque fiche : texte, date/heure, source, URL, IP, useragent
+• Export PDF de preuve
+• Audit log immuable
+10. MVP
+• Catalogue produits complet
+• Formulaires courts + champs obligatoires
+• Vente leads + RDV
+• Salle de marché
+• CRM courtier + apporteur
+• Consentement conforme et visible

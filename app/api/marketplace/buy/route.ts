@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { purchaseLeadSchema } from "@/lib/validations/leads";
 import { sendEmail, emailTemplates } from "@/lib/mail";
+import { notifyLeadPurchased, notifyLeadSold, notifyCreditLow } from "@/lib/notifications";
 
 export async function POST(req: Request) {
     try {
@@ -89,7 +90,30 @@ export async function POST(req: Request) {
             return { lead: updatedLead, broker, provider: lead.provider };
         });
 
-        // 6. Envoi des emails (en asynchrone hors de la transaction)
+        // 6. Créer des notifications
+        // Notify provider their lead was purchased
+        await notifyLeadPurchased(
+            result.lead.providerId,
+            result.lead.id,
+            result.lead.productType,
+            result.lead.price
+        );
+
+        // Notify broker they purchased a lead
+        await notifyLeadSold(
+            result.broker.id,
+            result.lead.id,
+            result.lead.productType,
+            result.lead.price
+        );
+
+        // Check if broker's credits are low (< 100€) and notify
+        const remainingCredits = result.broker.credits - result.lead.price;
+        if (remainingCredits < 100) {
+            await notifyCreditLow(result.broker.id, remainingCredits);
+        }
+
+        // 7. Envoi des emails (en asynchrone hors de la transaction)
         const templates = emailTemplates;
 
         // Email au courtier

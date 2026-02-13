@@ -23,6 +23,8 @@ export type ProductDefinition = {
   icon: any;
   category: "Crédit" | "Assurance" | "Patrimoine";
   hasAppointment: boolean;
+  basePrice: number;
+  appointmentPrice: number;
   fields: {
     name: string;
     label: string;
@@ -40,6 +42,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Home,
     category: "Crédit",
     hasAppointment: true,
+    basePrice: 35,
+    appointmentPrice: 50,
     fields: [
       { name: "projectType", label: "Type de projet", type: "select", options: ["Résidence principale", "Locatif"] },
       { name: "amount", label: "Montant du projet", type: "number", placeholder: "Ex: 250000" },
@@ -55,6 +59,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: HandCoins,
     category: "Crédit",
     hasAppointment: true,
+    basePrice: 30,
+    appointmentPrice: 45,
     fields: [
       { name: "owner", label: "Propriétaire", type: "boolean" },
       { name: "creditCount", label: "Nombre de crédits en cours", type: "number" },
@@ -71,6 +77,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Briefcase,
     category: "Crédit",
     hasAppointment: true,
+    basePrice: 35,
+    appointmentPrice: 50,
     fields: [
       { name: "status", label: "Statut", type: "select", options: ["Création", "Entreprise existante"] },
       { name: "activity", label: "Type d'activité", type: "text" },
@@ -86,6 +94,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: ShieldCheck,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 25,
+    appointmentPrice: 40,
     fields: [
       { name: "requestType", label: "Type de demande", type: "select", options: ["Changement", "Nouveau prêt"] },
       { name: "loanDate", label: "Date de signature du prêt", type: "date" },
@@ -100,6 +110,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Stethoscope,
     category: "Assurance",
     hasAppointment: false,
+    basePrice: 20,
+    appointmentPrice: 35,
     fields: [
       { name: "peopleCount", label: "Nombre de personnes à couvrir", type: "number" },
       { name: "age", label: "Âge de l'assuré principal", type: "number" },
@@ -113,6 +125,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Building2,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 35,
+    appointmentPrice: 50,
     fields: [
       { name: "employeeCount", label: "Nombre de salariés", type: "number" },
       { name: "sector", label: "Secteur d'activité", type: "text" },
@@ -126,6 +140,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: HeartPulse,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 30,
+    appointmentPrice: 45,
     fields: [
       { name: "status", label: "Statut", type: "select", options: ["TNS", "Dirigeant"] },
       { name: "activity", label: "Activité", type: "text" },
@@ -139,6 +155,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Car,
     category: "Assurance",
     hasAppointment: false,
+    basePrice: 15,
+    appointmentPrice: 30,
     fields: [
       { name: "vehicleType", label: "Type de véhicule", type: "text" },
       { name: "usage", label: "Usage", type: "select", options: ["Privé", "Professionnel"] },
@@ -152,6 +170,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Home,
     category: "Assurance",
     hasAppointment: false,
+    basePrice: 15,
+    appointmentPrice: 30,
     fields: [
       { name: "status", label: "Statut", type: "select", options: ["Locataire", "Propriétaire"] },
       { name: "housingType", label: "Type de logement", type: "select", options: ["Appartement", "Maison"] },
@@ -165,6 +185,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Dog,
     category: "Assurance",
     hasAppointment: false,
+    basePrice: 15,
+    appointmentPrice: 30,
     fields: [
       { name: "animalType", label: "Type d'animal", type: "select", options: ["Chien", "Chat"] },
       { name: "breed", label: "Race", type: "text", placeholder: "ou Croisé" },
@@ -178,6 +200,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Scale,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 30,
+    appointmentPrice: 45,
     fields: [
       { name: "activity", label: "Activité", type: "text" },
       { name: "legalStatus", label: "Statut juridique", type: "text" },
@@ -191,6 +215,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Briefcase,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 30,
+    appointmentPrice: 45,
     fields: [
       { name: "activity", label: "Activité", type: "text" },
       { name: "surface", label: "Surface des locaux (m²)", type: "number" },
@@ -204,6 +230,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: HardHat,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 35,
+    appointmentPrice: 50,
     fields: [
       { name: "trade", label: "Corps de métier", type: "text" },
       { name: "creationDate", label: "Date création entreprise", type: "date" },
@@ -217,6 +245,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Construction,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 40,
+    appointmentPrice: 55,
     fields: [
       { name: "projectType", label: "Type de projet", type: "select", options: ["Construction", "Rénovation"] },
       { name: "amount", label: "Montant travaux", type: "number" },
@@ -230,6 +260,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Building2,
     category: "Assurance",
     hasAppointment: false,
+    basePrice: 25,
+    appointmentPrice: 40,
     fields: [
       { name: "buildingType", label: "Type d'immeuble", type: "select", options: ["Copropriété", "Mono-propriété"] },
       { name: "lotCount", label: "Nombre de lots", type: "number" },
@@ -243,6 +275,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: Gavel,
     category: "Assurance",
     hasAppointment: true,
+    basePrice: 20,
+    appointmentPrice: 35,
     fields: [
       { name: "age", label: "Âge de l'assuré", type: "number" },
       { name: "contractType", label: "Type de contrat souhaité", type: "select", options: ["Capital", "Prestations", "Je ne sais pas"] },
@@ -257,6 +291,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: PiggyBank,
     category: "Patrimoine",
     hasAppointment: true,
+    basePrice: 40,
+    appointmentPrice: 55,
     fields: [
       { name: "objective", label: "Objectif principal", type: "select", options: ["Épargne", "Préparer retraite", "Transmission"] },
       { name: "amount", label: "Montant à investir", type: "select", options: ["< 10 000€", "10 000 - 50 000€", "50 000 - 150 000€", "> 150 000€"] },
@@ -270,6 +306,8 @@ export const PRODUCTS: ProductDefinition[] = [
     icon: TrendingUp,
     category: "Patrimoine",
     hasAppointment: true,
+    basePrice: 45,
+    appointmentPrice: 65,
     fields: [
       { name: "objective", label: "Objectif", type: "select", options: ["Réduire impôts", "Préparer retraite", "Investissement immobilier"] },
       { name: "taxAmount", label: "Montant d'impôt annuel", type: "select", options: ["3 000 - 5 000€", "5 000 - 10 000€", "10 000 - 20 000€", "> 20 000€", "Je ne sais pas"] },

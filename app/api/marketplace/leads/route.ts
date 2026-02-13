@@ -41,7 +41,7 @@ export async function GET(req: Request) {
             freshness: lead.createdAt, // Utilsé pour calculer la fraîcheur côté client
         }));
 
-        return NextResponse.json(sanitizedLeads);
+        return NextResponse.json({ leads: sanitizedLeads });
     } catch (error) {
         console.error("Marketplace fetch error:", error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

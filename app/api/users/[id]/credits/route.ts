@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/users/[id]/credits
@@ -9,11 +7,12 @@ const prisma = new PrismaClient();
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const user = await prisma.user.findUnique({
-            where: { id: params.id },
+            where: { id },
             select: { credits: true, email: true, name: true, role: true }
         });
 
@@ -40,9 +39,10 @@ export async function GET(
  */
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const { amount, paymentMethod, paymentIntentId } = await request.json();
 
         if (!amount || amount <= 0) {
@@ -56,7 +56,7 @@ export async function POST(
         // const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
         const user = await prisma.user.update({
-            where: { id: params.id },
+            where: { id },
             data: { credits: { increment: amount } }
         });
 

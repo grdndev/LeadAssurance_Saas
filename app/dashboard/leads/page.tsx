@@ -210,11 +210,21 @@ export default function MyLeadsPage() {
                                         {/* Lead Attributes */}
                                         <div className="mt-4 pt-4 border-t border-border/50">
                                             <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto scrollbar-hide py-1">
-                                                {Object.entries(JSON.parse(lead.attributes)).map(([key, value]) => (
-                                                    <span key={key} className="text-[10px] sm:text-xs bg-secondary px-2 py-1 rounded text-muted-foreground whitespace-nowrap">
-                                                        <span className="font-semibold text-foreground">{key}:</span> {String(value)}
-                                                    </span>
-                                                ))}
+                                                {(() => {
+                                                    try {
+                                                        const attrs = typeof lead.attributes === "string"
+                                                            ? JSON.parse(lead.attributes)
+                                                            : lead.attributes;
+                                                        if (!attrs || typeof attrs !== "object") return null;
+                                                        return Object.entries(attrs).map(([key, value]) => (
+                                                            <span key={key} className="text-[10px] sm:text-xs bg-secondary px-2 py-1 rounded text-muted-foreground whitespace-nowrap">
+                                                                <span className="font-semibold text-foreground">{key}:</span> {String(value)}
+                                                            </span>
+                                                        ));
+                                                    } catch {
+                                                        return <span className="text-xs text-muted-foreground italic">Attributs non disponibles</span>;
+                                                    }
+                                                })()}
                                             </div>
                                         </div>
                                     </CardContent>

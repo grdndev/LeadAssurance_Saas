@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { NotificationCenter } from "@/components/layout/NotificationCenter";
 
 export default function DashboardLayout({
   children,
@@ -96,13 +97,21 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        {/* Admin or Switching Role feature - only if user has both or for demo */}
-        <div className="px-4 mt-6">
+        {/* Admin or Switching Role feature */}
+        <div className="px-4 mt-6 space-y-2">
+          {userRole === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-medium text-red-500 hover:text-red-600 transition-colors border border-dashed border-red-500/30 rounded-lg"
+            >
+              Administration
+            </Link>
+          )}
           <Link
             href={isProvider ? "/dashboard" : "/dashboard/provider"}
             className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-medium text-muted-foreground hover:text-primary transition-colors border border-dashed border-border rounded-lg"
           >
-            Basculer vers {isProvider ? "Courtier" : "Apporteur"} (Démo)
+            Basculer vers {isProvider ? "Courtier" : "Apporteur"}
           </Link>
         </div>
 
@@ -142,19 +151,16 @@ export default function DashboardLayout({
               />
             </div>
 
-            <button className="relative text-muted-foreground hover:text-foreground">
-              <Bell className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">3</span>
-            </button>
-            <div className="flex items-center gap-3 ml-2">
+            <NotificationCenter />
+            <Link href="/settings" className="group flex items-center gap-3 ml-2 hover:opacity-80 transition-opacity cursor-pointer">
               <div className="hidden md:block text-right">
                 <p className="text-xs font-bold leading-none">{session?.user?.name}</p>
                 <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">{userRole}</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg border-2 border-background">
+              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg border-2 border-background transition-all group-hover:ring-2 group-hover:ring-primary/50">
                 {getInitials(session?.user?.name || "")}
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 

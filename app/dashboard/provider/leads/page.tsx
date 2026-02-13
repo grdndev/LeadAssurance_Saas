@@ -13,13 +13,16 @@ import {
     Calendar,
     MapPin,
     Loader2,
-    RefreshCw
+    RefreshCw,
+    Pencil,
+    Save
 } from "lucide-react";
 import { PRODUCTS, getProductById } from "@/lib/constants/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -49,6 +52,9 @@ export default function ProviderLeadsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedLead, setSelectedLead] = useState<any | null>(null);
     const [showDetailDialog, setShowDetailDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [editForm, setEditForm] = useState<any>({});
+    const [editSaving, setEditSaving] = useState(false);
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -78,6 +84,39 @@ export default function ProviderLeadsPage() {
     const handleViewDetails = (lead: any) => {
         setSelectedLead(lead);
         setShowDetailDialog(true);
+    };
+
+    const handleEditLead = (lead: any) => {
+        setSelectedLead(lead);
+        setEditForm({
+            firstName: lead.firstName,
+            lastName: lead.lastName,
+            phone: lead.phone,
+            email: lead.email,
+            zipCode: lead.zipCode,
+            city: lead.city,
+        });
+        setShowEditDialog(true);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!selectedLead) return;
+        setEditSaving(true);
+        try {
+            const res = await fetch(`/api/leads/${selectedLead.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editForm),
+            });
+            if (res.ok) {
+                setShowEditDialog(false);
+                fetchLeads();
+            }
+        } catch (err) {
+            console.error("Edit error:", err);
+        } finally {
+            setEditSaving(false);
+        }
     };
 
     // Calculate stats - Provider gets 50% commission
@@ -194,6 +233,16 @@ export default function ProviderLeadsPage() {
                                                         <div className="font-bold text-green-500">+{providerRevenue.toFixed(2)}€</div>
                                                     </div>
                                                 )}
+                                                {(lead.status === "PENDING" || lead.status === "PENDING_APPROVAL") && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleEditLead(lead)}
+                                                        className="rounded-full"
+                                                    >
+                                                        <Pencil className="h-4 w-4 mr-1" /> Modifier
+                                                    </Button>
+                                                )}
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
@@ -287,6 +336,85 @@ export default function ProviderLeadsPage() {
                             </div>
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Dialog */}
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Modifier le Lead</DialogTitle>
+                        <DialogDescription>
+                            Mettez à jour les informations du prospect (uniquement les leads en attente).
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Prénom</Label>
+                                <Input
+                                    value={editForm.firstName || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                                    className="rounded-full"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Nom</Label>
+                                <Input
+                                    value={editForm.lastName || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                                    className="rounded-full"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Téléphone</Label>
+                            <Input
+                                value={editForm.phone || ""}
+                                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                className="rounded-full"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input
+                                value={editForm.email || ""}
+                                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                className="rounded-full"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Code postal</Label>
+                                <Input
+                                    value={editForm.zipCode || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, zipCode: e.target.value })}
+                                    className="rounded-full"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Ville</Label>
+                                <Input
+                                    value={editForm.city || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                                    className="rounded-full"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="rounded-full">
+                                Annuler
+                            </Button>
+                            <Button onClick={handleSaveEdit} disabled={editSaving} className="rounded-full">
+                                {editSaving ? (
+                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sauvegarde...</>
+                                ) : (
+                                    <><Save className="h-4 w-4 mr-2" /> Enregistrer</>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

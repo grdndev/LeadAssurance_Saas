@@ -3,16 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Loader2, Users, Upload, AlertCircle } from "lucide-react";
+import { ShieldCheck, Loader2, Users, Upload, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [role, setRole] = useState<"BROKER" | "PROVIDER">("BROKER");
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -43,8 +45,27 @@ export default function RegisterPage() {
         throw new Error(data.error || "Une erreur est survenue");
       }
 
-      // Success - Redirect to login
-      router.push("/login?registered=true");
+      // Auto-login after registration
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (signInResult?.error) {
+        // Fallback: redirect to login if auto-sign-in fails
+        router.push("/login?registered=true");
+      } else {
+        // Role-based redirect
+        const session = await getSession();
+        const userRole = (session?.user as any)?.role;
+        if (userRole === "PROVIDER") {
+          router.push("/dashboard/provider");
+        } else {
+          router.push("/dashboard");
+        }
+        router.refresh();
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -65,7 +86,7 @@ export default function RegisterPage() {
       </div>
 
       <Card className="w-full max-w-md border-border/50 shadow-2xl">
-        < CardHeader className="space-y-1 text-center pb-6">
+        <CardHeader className="space-y-1 text-center pb-6">
           <Link href="/" className="flex justify-center mb-4">
             <div className="text-2xl font-bold tracking-tighter">
               <span className="text-primary">LEADS</span>ASSURANCE
@@ -154,14 +175,23 @@ export default function RegisterPage() {
 
             <div className="grid gap-2">
               <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                className="rounded-full"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  className="rounded-full pr-10"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-start gap-2">

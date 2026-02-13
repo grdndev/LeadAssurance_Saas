@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { PRODUCTS, getProductById } from "@/lib/constants/products";
@@ -23,11 +23,12 @@ interface FormData {
     consent: boolean;
 }
 
-export default function PublicLeadFormPage({ params }: { params: { productId: string } }) {
+export default function PublicLeadFormPage({ params }: { params: Promise<{ productId: string }> }) {
+    const { productId } = use(params);
     const router = useRouter();
-    const product = getProductById(params.productId);
+    const product = getProductById(productId);
     const [formData, setFormData] = useState<FormData>({
-        productType: params.productId,
+        productType: productId,
         firstName: "",
         lastName: "",
         email: "",
@@ -197,10 +198,10 @@ export default function PublicLeadFormPage({ params }: { params: { productId: st
                                                     <SelectContent>
                                                         {field.options?.map((option) => (
                                                             <SelectItem
-                                                                key={typeof option === "string" ? option : option.value}
-                                                                value={typeof option === "string" ? option : option.value}
+                                                                key={option}
+                                                                value={option}
                                                             >
-                                                                {typeof option === "string" ? option : option.label}
+                                                                {option}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>

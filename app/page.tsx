@@ -1,36 +1,17 @@
+"use client";
+
 import { Hero } from "@/components/marketing/Hero";
 import { ProductGrid } from "@/components/marketing/ProductGrid";
-import { Shield, Zap, CheckCircle2, FileText, BarChart3, Lock } from "lucide-react";
+import { Zap, CheckCircle2, BarChart3, Lock } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
+
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Navbar Minimaliste Premium */}
-      <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-background/50 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-          <Link href="/" className="text-xl font-bold tracking-tighter">
-            <span className="text-primary">LEADS</span>ASSURANCE
-          </Link>
-
-          <div className="hidden gap-8 text-sm font-medium md:flex">
-            <Link href="/dashboard/marketplace" className="hover:text-primary transition-colors">Salle de Marché</Link>
-            <Link href="/blog" className="hover:text-primary transition-colors">Blog & Conseils</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Tarifs</Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="hidden sm:block text-sm font-medium hover:text-primary transition-colors">Connexion</Link>
-            <Link href="/register">
-              <button className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
-                Démarrer
-              </button>
-            </Link>
-            {/* Mobile Menu Trigger could be added here if needed, but for now we optimize existing links */}
-          </div>
-        </div>
-      </nav>
-
       <main className="flex-grow">
         <Hero />
 
@@ -83,33 +64,16 @@ export default function Home() {
                 Inscrivez-vous gratuitement et accédez immédiatement à notre salle de marché de leads assurance et crédit.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">
-                <button className="rounded-full bg-white px-8 py-3 text-sm font-bold text-primary shadow-sm hover:bg-gray-100 transition-colors">
-                  Créer mon compte courtier
-                </button>
+                <Link href={isLoggedIn ? "/dashboard/marketplace" : "/register"}>
+                  <button className="rounded-full bg-white px-8 py-3 text-sm font-bold text-primary shadow-sm hover:bg-gray-100 transition-colors">
+                    {isLoggedIn ? "Accéder à la Salle de Marché" : "Créer mon compte courtier"}
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-secondary/20 py-12">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="text-lg font-bold tracking-tighter">
-              <span className="text-primary">LEADS</span>ASSURANCE
-            </div>
-            <div className="flex gap-8 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-primary">Conditions Générales</a>
-              <a href="#" className="hover:text-primary">Politique de Confidentialité</a>
-              <a href="#" className="hover:text-primary">Contact</a>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              © 2024 LeadsAssurance.com. Tous droits réservés.
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

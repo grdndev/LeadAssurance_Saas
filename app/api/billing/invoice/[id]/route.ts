@@ -8,7 +8,7 @@ import { InvoicePDF } from "@/components/billing/InvoicePDF";
 
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export async function GET(
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const transactionId = (await params).id;
+        const { id: transactionId } = await params;
 
         const transaction = await prisma.transaction.findUnique({
             where: { id: transactionId },
