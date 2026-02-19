@@ -23,6 +23,8 @@ export default function ProviderDashboardPage() {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [generatingMock, setGeneratingMock] = useState(false);
+    const [importingCSV, setImportingCSV] = useState(false);
+    const [importResult, setImportResult] = useState<any>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +69,42 @@ export default function ProviderDashboardPage() {
         }
     };
 
+    const handleCSVImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setImportingCSV(true);
+        setImportResult(null);
+        try {
+            const session = await fetch("/api/user/profile").then(r => r.json());
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("providerId", session.id);
+            const res = await fetch("/api/leads/import", {
+                method: "POST",
+                body: formData,
+            });
+            const result = await res.json();
+            if (res.ok) {
+                setImportResult(result.results);
+                toast.success(`Import terminé : ${result.results.accepted} lead(s) accepté(s)`);
+                // Refresh stats
+                const statsRes = await fetch("/api/user/provider/stats");
+                if (statsRes.ok) {
+                    const d = await statsRes.json();
+                    setData(d);
+                }
+            } else {
+                toast.error(result.error || "Erreur lors de l'import");
+            }
+        } catch (err) {
+            toast.error("Erreur lors de l'import CSV");
+        } finally {
+            setImportingCSV(false);
+            // Reset file input
+            e.target.value = "";
+        }
+    };
+
     const statusConfig = {
         STOCK: { label: "En Stock", color: "text-blue-500 bg-blue-500/10" },
         SOLD: { label: "Vendu", color: "text-green-500 bg-green-500/10" },
@@ -99,7 +137,7 @@ export default function ProviderDashboardPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Espace Apporteur</h1>
                     <p className="text-muted-foreground">Gérez vos leads et suivez vos performances.</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                     <Button 
                         variant="outline" 
                         onClick={handleGenerateMockData} 
@@ -113,6 +151,25 @@ export default function ProviderDashboardPage() {
                         )}
                         Générer données test
                     </Button>
+                    <label className="cursor-pointer">
+                        <input
+                            type="file"
+                            accept=".csv"
+                            className="hidden"
+                            onChange={handleCSVImport}
+                            disabled={importingCSV}
+                        />
+                        <Button asChild variant="outline" className="rounded-full px-6" disabled={importingCSV}>
+                            <span>
+                                {importingCSV ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                    <FileText className="h-4 w-4 mr-2" />
+                                )}
+                                Import CSV
+                            </span>
+                        </Button>
+                    </label>
                     <Link href="/dashboard/provider/submit">
                         <Button className="rounded-full px-6 bg-primary hover:bg-primary/90">
                             <Upload className="h-4 w-4 mr-2" /> Envoyer un Lead
@@ -120,6 +177,27 @@ export default function ProviderDashboardPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* CSV Import Result */}
+            {importResult && (
+                <div className="p-4 rounded-xl border border-border/50 bg-background/50 flex flex-wrap gap-6 items-center text-sm">
+                    <span className="font-semibold">Résultat de l&apos;import CSV :</span>
+                    <span className="text-muted-foreground">Total : <strong>{importResult.total}</strong></span>
+                    <span className="text-green-500">Acceptés : <strong>{importResult.accepted}</strong></span>
+                    <span className="text-red-500">Rejetés : <strong>{importResult.rejected}</strong></span>
+                    {importResult.errors?.length > 0 && (
+                        <details className="text-xs text-muted-foreground cursor-pointer">
+                            <summary>{importResult.errors.length} erreur(s)</summary>
+                            <ul className="mt-1 space-y-0.5">
+                                {importResult.errors.slice(0, 5).map((e: any, i: number) => (
+                                    <li key={i}>Ligne {e.line} : {e.error}</li>
+                                ))}
+                            </ul>
+                        </details>
+                    )}
+                    <button onClick={() => setImportResult(null)} className="ml-auto text-muted-foreground hover:text-foreground text-xs">✕ Fermer</button>
+                </div>
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

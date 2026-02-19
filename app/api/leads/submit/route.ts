@@ -41,6 +41,14 @@ export async function POST(req: Request) {
         // Récupérer les infos client pour le consentement
         const ipAddress = req.headers.get("x-forwarded-for") || "127.0.0.1";
         const userAgent = req.headers.get("user-agent") || "unknown";
+        const timestamp = new Date().toISOString();
+
+        // Créer le hash de preuve (SHA-256)
+        const proofString = `${firstName}${lastName}${email}${consentText}${timestamp}${ipAddress}`;
+        const proofHash = await crypto.subtle.digest(
+            'SHA-256',
+            new TextEncoder().encode(proofString)
+        ).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''));
 
         const lead = await prisma.lead.create({
             data: {
@@ -61,6 +69,7 @@ export async function POST(req: Request) {
                         ipAddress,
                         userAgent,
                         urlSource: urlSource || "manual_injection",
+                        proofHash,
                     },
                 },
             },

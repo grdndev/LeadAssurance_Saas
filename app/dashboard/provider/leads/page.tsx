@@ -281,7 +281,7 @@ export default function ProviderLeadsPage() {
 
                                                     {lead.status === "REJECTED" && (
                                                         <div className="mt-2 text-xs text-red-500 bg-red-500/10 px-3 py-1.5 rounded-lg inline-block">
-                                                            Motif: Information manquante ou non conforme.
+                                                            Motif: {lead.rejectionReason || "Non conforme"}
                                                         </div>
                                                     )}
                                                 </div>
@@ -385,7 +385,7 @@ export default function ProviderLeadsPage() {
                                         <XCircle className="h-5 w-5" />
                                         Lead refusé
                                     </div>
-                                    <p className="text-sm mt-2">Les informations fournies ne permettent pas la validation de ce prospect selon nos critères de qualité.</p>
+                                    <p className="text-sm mt-2">{selectedLead.rejectionReason || "Les informations fournies ne permettent pas la validation de ce prospect selon nos critères de qualité."}</p>
                                 </div>
                             )}
 

@@ -15,17 +15,20 @@ import {
     Filter,
     Search,
     ShieldCheck,
-    Loader2
+    Loader2,
+    ChevronDown,
 } from "lucide-react";
 import { PRODUCTS, getProductById } from "@/lib/constants/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
@@ -36,32 +39,45 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import dynamic from "next/dynamic";
-
-// Dynamic import of PDF components to avoid SSR issues
-const PDFDownloadLink = dynamic(
-    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-    { ssr: false }
-);
-const ConsentPDF = dynamic(
-    () => import("@/components/leads/ConsentPDF").then((mod) => mod.ConsentPDF),
-    { ssr: false }
-);
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const statusConfig = {
     SOLD: { label: "Nouveau", color: "bg-blue-500", icon: Clock },
     CONTACTED: { label: "Contacté", color: "bg-yellow-500", icon: Phone },
-    CONVERTED: { label: "Vendu", color: "bg-green-500", icon: CheckCircle2 },
+    CONVERTED: { label: "Converti", color: "bg-green-500", icon: CheckCircle2 },
     LOST: { label: "Perdu", color: "bg-red-500", icon: XCircle },
 };
 
 export default function MyLeadsPage() {
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [PDFDownloadLink, setPDFDownloadLink] = useState<any>(null);
+    const [ConsentPDF, setConsentPDF] = useState<any>(null);
     const [selectedLead, setSelectedLead] = useState<any | null>(null);
     const [showConsentDialog, setShowConsentDialog] = useState(false);
+    const [showLossDialog, setShowLossDialog] = useState(false);
+    const [lossLeadId, setLossLeadId] = useState<string | null>(null);
+    const [lossReason, setLossReason] = useState("");
+    const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+
+    useEffect(() => {
+        Promise.all([
+            import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
+            import("@/components/leads/ConsentPDF").then((m) => m.ConsentPDF),
+        ]).then(([PDFLink, Consent]) => {
+            setPDFDownloadLink(() => PDFLink);
+            setConsentPDF(() => Consent);
+        });
+    }, []);
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -80,19 +96,49 @@ export default function MyLeadsPage() {
         fetchLeads();
     }, []);
 
+    const handleUpdateStatus = async (leadId: string, brokerStatus: string, reason?: string) => {
+        setUpdatingStatus(leadId);
+        try {
+            const res = await fetch(`/api/user/leads/${leadId}/status`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ brokerStatus, lossReason: reason }),
+            });
+            if (!res.ok) throw new Error();
+            setLeads(prev => prev.map(l =>
+                l.id === leadId ? { ...l, brokerStatus, lossReason: reason || null } : l
+            ));
+            toast.success("Statut mis à jour");
+        } catch {
+            toast.error("Erreur lors de la mise à jour");
+        } finally {
+            setUpdatingStatus(null);
+        }
+    };
+
+    const handleMarkLost = (leadId: string) => {
+        setLossLeadId(leadId);
+        setLossReason("");
+        setShowLossDialog(true);
+    };
+
+    const confirmLoss = async () => {
+        if (!lossLeadId) return;
+        await handleUpdateStatus(lossLeadId, "LOST", lossReason);
+        setShowLossDialog(false);
+        setLossLeadId(null);
+    };
+
     const filteredLeads = leads.filter(lead => {
-        const matchesStatus = filterStatus === "all" || lead.brokerStatus === filterStatus;
+        // "SOLD" in the filter means "Nouveau" (brokerStatus is null = not yet acted upon)
+        const matchesStatus = filterStatus === "all" ||
+            (filterStatus === "SOLD" ? !lead.brokerStatus : lead.brokerStatus === filterStatus);
         const matchesSearch = searchQuery === "" ||
             lead.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.city.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesStatus && matchesSearch;
     });
-
-    const handleViewConsent = (lead: any) => {
-        setSelectedLead(lead);
-        setShowConsentDialog(true);
-    };
 
     return (
         <div className="space-y-8">
@@ -126,7 +172,7 @@ export default function MyLeadsPage() {
                         <SelectItem value="all">Tous les statuts</SelectItem>
                         <SelectItem value="SOLD">Nouveau</SelectItem>
                         <SelectItem value="CONTACTED">Contacté</SelectItem>
-                        <SelectItem value="CONVERTED">Vendu</SelectItem>
+                        <SelectItem value="CONVERTED">Converti</SelectItem>
                         <SelectItem value="LOST">Perdu</SelectItem>
                     </SelectContent>
                 </Select>
@@ -141,8 +187,6 @@ export default function MyLeadsPage() {
                 ) : (
                     filteredLeads.map((lead, idx) => {
                         const product = getProductById(lead.productType);
-                        const status = (statusConfig as any)[lead.status] || statusConfig.SOLD;
-                        const StatusIcon = status.icon;
 
                         return (
                             <motion.div
@@ -184,24 +228,65 @@ export default function MyLeadsPage() {
                                             {/* Status & Actions */}
                                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-end xl:flex-row xl:items-center">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white ${status.color}`}>
-                                                        <StatusIcon className="h-3 w-3" />
-                                                        {status.label}
-                                                    </span>
+                                                    {/* Status Dropdown */}
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button
+                                                                disabled={updatingStatus === lead.id}
+                                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-80 ${(statusConfig as any)[lead.brokerStatus || "SOLD"]?.color || "bg-blue-500"}`}
+                                                            >
+                                                                {updatingStatus === lead.id ? (
+                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                ) : (
+                                                                    <>
+                                                                        {(() => { const S = (statusConfig as any)[lead.brokerStatus || "SOLD"]?.icon || Clock; return <S className="h-3 w-3" />; })()}
+                                                                        {(statusConfig as any)[lead.brokerStatus || "SOLD"]?.label || "Nouveau"}
+                                                                        <ChevronDown className="h-3 w-3" />
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="w-44">
+                                                            <DropdownMenuItem onClick={() => handleUpdateStatus(lead.id, "CONTACTED")}>
+                                                                <Phone className="h-4 w-4 mr-2 text-yellow-500" /> Contacté
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleUpdateStatus(lead.id, "CONVERTED")}>
+                                                                <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" /> Converti
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem className="text-red-500" onClick={() => handleMarkLost(lead.id)}>
+                                                                <XCircle className="h-4 w-4 mr-2" /> Perdu...
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                                                         <Calendar className="h-3 w-3" />
                                                         {new Date(lead.updatedAt).toLocaleDateString("fr-FR")}
                                                     </span>
                                                 </div>
+                                                {lead.lossReason && (
+                                                    <span className="text-xs text-red-400 italic truncate max-w-[160px]" title={lead.lossReason}>
+                                                        Motif : {lead.lossReason}
+                                                    </span>
+                                                )}
 
                                                 <div className="flex gap-2">
+                                                    <Link href={`/dashboard/leads/${lead.id}`}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="rounded-full"
+                                                        >
+                                                            <Eye className="h-4 w-4 mr-1" /> Détail
+                                                        </Button>
+                                                    </Link>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => handleViewConsent(lead)}
+                                                        onClick={() => { setSelectedLead(lead); setShowConsentDialog(true); }}
                                                         className="rounded-full"
                                                     >
-                                                        <Eye className="h-4 w-4 mr-1" /> Consentement
+                                                        <ShieldCheck className="h-4 w-4 mr-1" /> RGPD
                                                     </Button>
                                                 </div>
                                             </div>
@@ -240,6 +325,45 @@ export default function MyLeadsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Loss Reason Dialog */}
+            <Dialog open={showLossDialog} onOpenChange={setShowLossDialog}>
+                <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                    <DialogHeader>
+                        <DialogTitle>Marquer comme perdu</DialogTitle>
+                        <DialogDescription>
+                            Optionnel : indiquez la raison pour laquelle ce lead n'a pas abouti.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <Select onValueChange={setLossReason} value={lossReason}>
+                            <SelectTrigger className="rounded-full">
+                                <SelectValue placeholder="Sélectionner un motif (optionnel)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Prix trop élevé">Prix trop élevé</SelectItem>
+                                <SelectItem value="Injoignable">Injoignable</SelectItem>
+                                <SelectItem value="Déjà assuré">Déjà assuré</SelectItem>
+                                <SelectItem value="Projet annulé">Projet annulé</SelectItem>
+                                <SelectItem value="Pas intéressé">Pas intéressé</SelectItem>
+                                <SelectItem value="Autre">Autre</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Input
+                            placeholder="Précisez si besoin..."
+                            className="rounded-full"
+                            value={lossReason}
+                            onChange={(e) => setLossReason(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter className="gap-2">
+                        <Button variant="ghost" onClick={() => setShowLossDialog(false)} className="rounded-full">Annuler</Button>
+                        <Button variant="destructive" onClick={confirmLoss} className="rounded-full">
+                            <XCircle className="h-4 w-4 mr-2" /> Confirmer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Consent Proof Dialog */}
             <Dialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
@@ -282,13 +406,13 @@ export default function MyLeadsPage() {
                                 <p className="font-mono text-xs break-all">{selectedLead.consent.userAgent}</p>
                             </div>
 
-                            {ConsentPDF && PDFDownloadLink && (
+                            {PDFDownloadLink && ConsentPDF && selectedLead?.consent && (
                                 <PDFDownloadLink
                                     document={<ConsentPDF lead={selectedLead} consent={selectedLead.consent} />}
                                     fileName={`preuve-consentement-${selectedLead.id}.pdf`}
                                     className="w-full"
                                 >
-                                    {({ loading: pdfLoading }) => (
+                                    {({ loading: pdfLoading }: { loading: boolean }) => (
                                         <Button
                                             className="w-full rounded-full"
                                             disabled={pdfLoading}

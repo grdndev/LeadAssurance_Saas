@@ -101,6 +101,13 @@ model Lead {
   isExclusive     Boolean        @default(true)
   price           Float
 
+  // Broker CRM tracking
+  brokerStatus    String?        // CONTACTED, CONVERTED, LOST
+  lossReason      String?        // Optional reason when brokerStatus = LOST
+
+  // Provider rejection reason
+  rejectionReason String?        // Filled by admin when status = REJECTED
+
   consent         Consent?
 
   // Relations
@@ -125,6 +132,7 @@ model Consent {
   lead            Lead     @relation(fields: [leadId], references: [id])
 
   consentText     String
+  consentVersion  String         @default("1.0")  // Version of consent text accepted
   ipAddress       String
   userAgent       String
   urlSource       String
@@ -187,5 +195,21 @@ model Notification {
   createdAt DateTime @default(now())
   
   @@index([userId, read])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  // Who performed the action (null = system)
+  action     String   // e.g. LEAD_APPROVED, LEAD_REJECTED, LEAD_PURCHASED, STATUS_CHANGED
+  entityType String   // e.g. Lead, User, Transaction
+  entityId   String   // ID of the affected entity
+  details    String?  // JSON string with extra context (before/after values, reason, etc.)
+  ipAddress  String?
+
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
   @@index([createdAt])
 }

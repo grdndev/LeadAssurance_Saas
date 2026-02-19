@@ -47,6 +47,7 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProductType, setSelectedProductType] = useState("all");
   const [zipFilter, setZipFilter] = useState("");
+  const [freshnessFilter, setFreshnessFilter] = useState("all");
   const [reservedLead, setReservedLead] = useState<string | null>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedLeadForPurchase, setSelectedLeadForPurchase] = useState<any | null>(null);
@@ -162,7 +163,16 @@ export default function MarketplacePage() {
     const matchesCategory = selectedCategory === "All" || product?.category === selectedCategory;
     const matchesProduct = selectedProductType === "all" || lead.productType === selectedProductType;
     const matchesZip = zipFilter === "" || lead.zipCode.startsWith(zipFilter);
-    return matchesCategory && matchesProduct && matchesZip;
+
+    // Freshness filter
+    let matchesFreshness = true;
+    if (freshnessFilter !== "all") {
+      const hoursAgo = parseInt(freshnessFilter, 10);
+      const cutoff = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
+      matchesFreshness = new Date(lead.createdAt) >= cutoff;
+    }
+
+    return matchesCategory && matchesProduct && matchesZip && matchesFreshness;
   });
 
   // Get unique product types for filter
@@ -199,6 +209,26 @@ export default function MarketplacePage() {
               className="rounded-full"
             >
               {cat === "All" ? "Tous" : cat}
+            </Button>
+          ))}
+        </div>
+
+        {/* Freshness filter */}
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: "all", label: "Toute fraîcheur" },
+            { value: "24", label: "< 24h" },
+            { value: "48", label: "< 48h" },
+            { value: "72", label: "< 72h" },
+          ].map((opt) => (
+            <Button
+              key={opt.value}
+              variant={freshnessFilter === opt.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFreshnessFilter(opt.value)}
+              className="rounded-full"
+            >
+              {opt.label}
             </Button>
           ))}
         </div>

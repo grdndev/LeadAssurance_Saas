@@ -1,0 +1,215 @@
+====================================================
+GAP ANALYSIS — LeadsAssurance.com
+CDC vs. Workspace (19/02/2026) — Updated Pass 3
+====================================================
+
+----------------------------------------------------
+SECTION 1 — VISION & OBJECTIFS
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Achat de leads qualifiés via la salle de marché (marketplace)
+✅ Consentement accessible sur chaque lead (preuve PDF exportable)
+✅ Fraîcheur visible sur la marketplace (badge "ultra-frais", "frais", etc.)
+✅ Conformité RGPD : consentement explicite, IP, user-agent, URL source, horodatage
+✅ Hash SHA-256 (proofHash) calculé à la soumission (submit, leads/route.ts, import CSV)
+
+MANQUANT :
+❌ Achat de RDV qualifiés — leadType APPOINTMENT existe en DB mais aucun formulaire
+   dédié RDV, aucune page de soumission spécifique, ni interface de consultation
+❌ Transparence des prix côté front public (page /tarifs à vérifier)
+
+
+----------------------------------------------------
+SECTION 2 — CATALOGUE PRODUITS (18 produits)
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ 18 produits définis dans lib/constants/products.ts avec champs, prix, catégories
+✅ Pages formulaires lead individuelles pour les 18 produits :
+   ASSURANCE_AUTO, ASSURANCE_HABITATION, ASSURANCE_CHIENS_CHATS,
+   ASSURANCE_OBSEQUES, ASSURANCE_VIE_RETRAITE, DEFISCALISATION,
+   DOMMAGE_OUVRAGE, MULTIRISQUE_IMMEUBLE, MULTIRISQUE_PROFESSIONNELLE,
+   PREVOYANCE_TNS, RC_DECENNALE, RC_PRO,
+   CREDIT_IMMO, RACHAT_CREDIT, CREDIT_PRO, ASSURANCE_EMPRUNTEUR,
+   MUTUELLE_SANTE_IND, MUTUELLE_ENTREPRISE  (ajoutés en Pass 2)
+
+MANQUANT / INCOMPLET :
+⚠️  MUTUELLE_SANTE_IND : le CDC demande "âge de(s) assuré(s)" (pluriel).
+    Le formulaire recueille un seul champ "age" — acceptable pour MVP.
+
+
+----------------------------------------------------
+SECTION 3 — CHAMPS COMMUNS OBLIGATOIRES
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Prénom, Nom, Téléphone, Email, Code postal, Ville — tous dans le modèle Lead
+✅ Consentement : case non pré-cochée, texte, horodatage, IP, user-agent, URL source
+✅ Versioning du consentement : champ consentVersion @default("1.0") dans Consent
+
+MANQUANT :
+⚠️  Certains formulaires provider passent "manual_injection" comme urlSource.
+    Acceptable pour l'espace apporteur.
+
+
+----------------------------------------------------
+SECTION 4 — CHAMPS OBLIGATOIRES PAR PRODUIT
+----------------------------------------------------
+
+✅ Tous les 18 produits ont leurs champs CDC définis dans products.ts et
+   dans les formulaires dédiés.
+
+
+----------------------------------------------------
+SECTION 5 — RDV QUALIFIÉS (CPRDV)
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Modèle DB Lead : leadType, appointmentDate, appointmentChannel (PHONE/VISIO),
+   appointmentStatus, availabilities, confirmationSentAt, isAppointment
+
+MANQUANT :
+❌ Aucun formulaire public de soumission RDV (créneaux, canal téléphone/visio)
+❌ Aucune interface courtier dédiée RDV (séparée des leads classiques)
+❌ Pas d'envoi SMS de confirmation RDV (uniquement email via lib/mail.ts)
+❌ Consentement renforcé spécifique aux RDV non différencié
+❌ Aucun filtre "RDV" sur la marketplace pour achat ciblé
+
+
+----------------------------------------------------
+SECTION 6 — SALLE DE MARCHÉ
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Mise en stock des leads validés (status=STOCK)
+✅ Achat à l'unité avec système de crédits
+✅ Réservation temporaire pendant le paiement (MarketplaceReservation, 10 min)
+✅ Infos visibles avant achat : produit, zone (CP masqué), fraîcheur, prix
+✅ Consentement accessible après achat (badge ✔ visible, dialog + PDF)
+✅ Accès public sans connexion (visualisation uniquement)
+✅ Filtre par fraîcheur (< 24h / < 48h / < 72h)  ← Pass 3
+✅ Filtres catégorie + type produit + code postal
+
+MANQUANT :
+❌ Paiement direct par CB (uniquement via recharge de crédits Stripe)
+❌ Filtre dédié "RDV" pour acheter des rendez-vous qualifiés
+
+
+----------------------------------------------------
+SECTION 7 — ESPACE COURTIER
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Tableau de bord avec stats
+✅ Liste des leads achetés (dashboard/leads) avec filtres et recherche
+✅ Fiche détaillée par lead : page /dashboard/leads/[id]  ← Pass 3
+✅ Changement de statut CRM : Contacté / Converti / Perdu (dropdown)  ← Pass 2
+✅ Motif de perte optionnel (liste + saisie libre)  ← Pass 2
+✅ Filtre leads par statut CRM (bug filtre "Nouveau" corrigé)  ← Pass 3
+✅ Preuve de consentement + export PDF (liste ET fiche détail)
+✅ Salle de marché accessible (dashboard/marketplace)
+✅ Crédits & facturation (dashboard/billing) avec historique
+
+MANQUANT :
+❌ Section "RDV" séparée dans le dashboard courtier
+❌ Confirmation SMS après achat RDV
+
+
+----------------------------------------------------
+SECTION 8 — ESPACE APPORTEUR (PROVIDER)
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Soumission manuelle de leads (dashboard/provider/submit)
+✅ Import CSV : route API + bouton upload UI dans le dashboard provider  ← Pass 3
+✅ Consentement obligatoire sur la soumission
+✅ Validation automatique des champs requis
+✅ Reporting (stats : acceptés, vendus, en attente, revenus)
+✅ Liste des leads soumis avec statut et filtre
+✅ Motifs de rejet affichés à l'apporteur (rejectionReason DB + UI)  ← Pass 2
+✅ Notification apporteur quand lead approuvé ou rejeté  ← Pass 3
+✅ proofHash calculé à la soumission manuelle et CSV  ← Pass 2/3
+
+MANQUANT :
+❌ API externe apporteur sécurisée par API key (pour intégrations tierces)
+❌ Rejet automatique avec règles configurables (doublons, champs manquants)
+❌ Reporting des leads refusés avec motifs dans espace apporteur
+
+
+----------------------------------------------------
+SECTION 9 — CONFORMITÉ & CONSENTEMENT
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Consentement explicite obligatoire sur tous les formulaires
+✅ Texte de consentement stocké par lead
+✅ Date/heure, IP publique, user-agent, URL source stockés
+✅ Versioning du consentement (consentVersion @default("1.0"))
+✅ Hash SHA-256 (proofHash) calculé et stocké sur tous les chemins de création
+✅ Preuve consultable (courtier : liste + fiche détail /leads/[id])
+✅ Export PDF de preuve (ConsentPDF via @react-pdf/renderer)
+✅ Consentement lié à chaque lead (relation Consent ↔ Lead 1-to-1)
+
+MANQUANT :
+❌ Preuve de consentement accessible côté apporteur (uniquement courtier)
+
+
+----------------------------------------------------
+SECTION 10 — AUDIT LOG
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Modèle AuditLog en base (userId, action, entityType, entityId, details, ip)  ← Pass 3
+✅ lib/audit.ts avec writeAuditLog() helper non-bloquant (jamais bloquant)
+✅ Journalisé sur : LEAD_APPROVED, LEAD_REJECTED, LEAD_PURCHASED,
+                    BROKER_STATUS_CHANGED  ← Pass 3
+
+MANQUANT :
+❌ Interface admin pour consulter les logs d'audit (UI non créée)
+❌ Logging sur : LEAD_SUBMITTED, CREDIT_RECHARGED, USER_REGISTERED,
+                 DISPUTE_OPENED / RESOLVED
+
+
+----------------------------------------------------
+SECTION 11 — NOTIFICATIONS
+----------------------------------------------------
+
+IMPLÉMENTÉ :
+✅ Modèle Notification en base
+✅ lib/notifications.ts : notifyLeadPurchased, notifyLeadSold, notifyCreditLow,
+   notifyDisputeOpened, notifyLeadApproved, notifyLeadRejected
+✅ Déclenchement : achat lead (courtier + apporteur), crédits faibles
+✅ Déclenchement : approbation/rejet admin → notification apporteur  ← Pass 3
+✅ NotificationCenter dans le dashboard (cloche)
+
+MANQUANT :
+❌ Notification temps-réel (WebSocket / SSE) — actuellement polling uniquement
+
+
+----------------------------------------------------
+SECTION 12 — RÉCAPITULATIF MVP (ÉTAT ACTUEL)
+----------------------------------------------------
+
+MVP COMPLET ✅ :
+- Catalogue 18 produits avec 18 formulaires dédiés
+- Salle de marché : achat, réservation, filtres catégorie/produit/fraîcheur/CP
+- CRM courtier : liste, fiche /[id], CRM statuts, motif perte, consentement PDF
+- CRM apporteur : soumission manuelle + import CSV + stats + motifs refus
+- Consentement RGPD : IP, UA, URL, timestamp, texte, version, proofHash SHA-256, PDF
+- Système de crédits + recharge Stripe
+- Notifications in-app (achat, vente, crédits bas, approbation, rejet)
+- Admin : modération leads avec motif rejet + notifications apporteur
+- Audit log immuable (modèle DB + helper + 4 actions journalisées)
+
+À FAIRE ❌ (priorité basse / post-MVP) :
+1. RDV qualifiés complet :
+   - Formulaire public soumission RDV (créneaux, canal, consentement renforcé)
+   - Interface courtier dédiée RDV
+   - SMS confirmation RDV
+   - Filtre RDV sur la marketplace
+2. Achat direct CB sur la marketplace (sans recharge préalable)
+3. API externe apporteur sécurisée par API key
+4. Interface admin logs d'audit
+5. Notifications temps-réel (WebSocket/SSE)
+6. Rejet automatique avec règles configurables

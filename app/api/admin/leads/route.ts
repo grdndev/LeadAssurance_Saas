@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { notifyLeadApproved, notifyLeadRejected } from "@/lib/notifications";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(request: Request) {
     try {
@@ -43,7 +45,7 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { leadId, status } = await request.json();
+        const { leadId, status, rejectionReason } = await request.json();
 
         if (!leadId || !["STOCK", "REJECTED"].includes(status)) {
             return NextResponse.json({ error: "Données invalides" }, { status: 400 });
@@ -51,7 +53,26 @@ export async function PATCH(request: Request) {
 
         const updatedLead = await prisma.lead.update({
             where: { id: leadId },
-            data: { status }
+            data: {
+                status,
+                rejectionReason: status === "REJECTED" ? (rejectionReason || "Non conforme") : null,
+            }
+        });
+
+        // Notify the provider of the decision
+        if (status === "STOCK") {
+            await notifyLeadApproved(updatedLead.providerId, updatedLead.id, updatedLead.productType);
+        } else if (status === "REJECTED") {
+            await notifyLeadRejected(updatedLead.providerId, updatedLead.id, updatedLead.productType, rejectionReason);
+        }
+
+        // Audit log
+        await writeAuditLog({
+            userId: (session.user as any).id,
+            action: status === "STOCK" ? "LEAD_APPROVED" : "LEAD_REJECTED",
+            entityType: "Lead",
+            entityId: updatedLead.id,
+            details: { status, rejectionReason: rejectionReason || null },
         });
 
         return NextResponse.json({ success: true, lead: updatedLead });

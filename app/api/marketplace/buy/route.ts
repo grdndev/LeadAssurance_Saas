@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { purchaseLeadSchema } from "@/lib/validations/leads";
 import { sendEmail, emailTemplates } from "@/lib/mail";
 import { notifyLeadPurchased, notifyLeadSold, notifyCreditLow } from "@/lib/notifications";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
     try {
@@ -113,7 +114,16 @@ export async function POST(req: Request) {
             await notifyCreditLow(result.broker.id, remainingCredits);
         }
 
-        // 7. Envoi des emails (en asynchrone hors de la transaction)
+        // 7. Audit log
+        await writeAuditLog({
+            userId: result.broker.id,
+            action: "LEAD_PURCHASED",
+            entityType: "Lead",
+            entityId: result.lead.id,
+            details: { productType: result.lead.productType, price: result.lead.price, providerId: result.lead.providerId },
+        });
+
+        // 8. Envoi des emails (en asynchrone hors de la transaction)
         const templates = emailTemplates;
 
         // Email au courtier
