@@ -498,9 +498,6 @@ export default function SubmitLeadPage() {
   );
 }
 
-
-export default function SubmitLeadPage() {
-  const [selectedProduct, setSelectedProduct] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
