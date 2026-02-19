@@ -9,7 +9,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
-  Sparkles
+  Sparkles,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -200,6 +201,11 @@ export default function DashboardPage() {
             <Link href="/dashboard/billing">
               <Button className="w-full rounded-full py-6 text-sm font-bold">
                 <Plus className="h-4 w-4 mr-2" /> Recharger mon compte
+              </Button>
+            </Link>
+            <Link href="/dashboard/appointments">
+              <Button variant="outline" className="w-full rounded-full text-sm border-purple-500/30 text-purple-600 hover:bg-purple-500/5">
+                <Calendar className="h-4 w-4 mr-2" /> Mes RDV Qualifiés
               </Button>
             </Link>
             <div className="text-center">

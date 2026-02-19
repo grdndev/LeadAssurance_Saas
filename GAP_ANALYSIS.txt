@@ -1,6 +1,6 @@
 ====================================================
 GAP ANALYSIS — LeadsAssurance.com
-CDC vs. Workspace (19/02/2026) — Updated Pass 4 (Post-MVP)
+CDC vs. Workspace (19/02/2026) — Updated Pass 5 (Full RDV Workflow)
 ====================================================
 
 ----------------------------------------------------
@@ -15,9 +15,7 @@ IMPLÉMENTÉ :
 ✅ Hash SHA-256 (proofHash) calculé à la soumission (submit, leads/route.ts, import CSV)
 
 MANQUANT :
-❌ Achat de RDV qualifiés — leadType APPOINTMENT existe en DB mais aucun formulaire
-   dédié RDV, aucune page de soumission spécifique, ni interface de consultation
-❌ Transparence des prix côté front public (page /tarifs à vérifier)
+⚠️  Transparence des prix côté front public (page /tarifs à vérifier)
 
 
 ----------------------------------------------------
@@ -68,13 +66,42 @@ SECTION 5 — RDV QUALIFIÉS (CPRDV)
 IMPLÉMENTÉ :
 ✅ Modèle DB Lead : leadType, appointmentDate, appointmentChannel (PHONE/VISIO),
    appointmentStatus, availabilities, confirmationSentAt, isAppointment
+✅ Formulaire soumission apporteur avec toggle Lead/RDV  ← Pass 5
+   - Sélection canal PHONE/VISIO (obligatoire pour RDV)
+   - Date souhaitée + créneaux de disponibilité multiples (ajout/suppression dynamique)
+   - Texte de consentement renforcé spécifique aux RDV
+   - Prix automatique (appointmentPrice) selon le produit
+   - Filtre produits : seuls les produits hasAppointment=true sont proposés en mode RDV
+   - API /api/leads/submit étendue : leadType, appointmentChannel, appointmentDate,
+     availabilities, appointmentStatus=PENDING, prix appointmentPrice  ← Pass 5
+✅ Filtre "RDV Qualifiés" sur la marketplace  ← Pass 5
+   - Bouton "RDV Qualifiés" dans les filtres (distinct des leads classiques)
+   - Carte marketplace : badge canal (PHONE/VISIO), date souhaitée si renseignée
+   - Badge "RDV" violet distinct du badge "Ultra-Frais"
+   - Stats bar : compteur RDV qualifiés distincts des leads classiques
+   - API /api/marketplace/leads expose leadType, appointmentChannel, appointmentDate
+✅ Section "Mes RDV" dédiée dans le dashboard courtier  ← Pass 5
+   - Page /dashboard/appointments avec liste des RDV achetés
+   - Filtres statut (En attente / Confirmé / Annulé) + recherche
+   - Stats : total / en attente / confirmés / annulés
+   - Affichage : canal, date souhaitée, créneaux de disponibilité
+   - Actions : Confirmer / Annuler le RDV (boutons inline)
+   - Accès preuve de consentement renforcé + export PDF
+   - Lien "Mes RDV" dans la sidebar courtier
+   - Bouton "Mes RDV Qualifiés" dans la page de tableau de bord
+✅ API PATCH /api/user/leads/[id]/appointment  ← Pass 5
+   - Met à jour appointmentStatus (CONFIRMED/CANCELLED)
+   - Enregistre confirmationSentAt à la confirmation
+   - Envoie email de notification de changement de statut au courtier
+   - Audit log BROKER_STATUS_CHANGED avec context leadType=APPOINTMENT
+✅ Emails post-achat RDV différenciés  ← Pass 5
+   - emailTemplates.appointmentPurchased : courtier après achat RDV
+   - emailTemplates.appointmentSold : apporteur après vente RDV
+   - emailTemplates.appointmentStatusChanged : courtier lors de confirmation/annulation
 
 MANQUANT :
-❌ Aucun formulaire public de soumission RDV (créneaux, canal téléphone/visio)
-❌ Aucune interface courtier dédiée RDV (séparée des leads classiques)
-❌ Pas d'envoi SMS de confirmation RDV (uniquement email via lib/mail.ts)
-❌ Consentement renforcé spécifique aux RDV non différencié
-❌ Aucun filtre "RDV" sur la marketplace pour achat ciblé
+⚠️  SMS de confirmation RDV (Twilio non configuré — email seul)
+    → Acceptable : email de confirmation envoyé via lib/mail.ts + Resend
 
 
 ----------------------------------------------------
@@ -93,7 +120,7 @@ IMPLÉMENTÉ :
 
 MANQUANT :
 ❌ Paiement direct par CB (uniquement via recharge de crédits Stripe)
-❌ Filtre dédié "RDV" pour acheter des rendez-vous qualifiés
+⚠️  Filtre "RDV" implémenté en Pass 5 — complété
 
 
 ----------------------------------------------------
@@ -110,10 +137,11 @@ IMPLÉMENTÉ :
 ✅ Preuve de consentement + export PDF (liste ET fiche détail)
 ✅ Salle de marché accessible (dashboard/marketplace)
 ✅ Crédits & facturation (dashboard/billing) avec historique
+✅ Section "Mes RDV" dédiée /dashboard/appointments  ← Pass 5
+✅ Confirmation/annulation RDV inline avec email de notification  ← Pass 5
 
 MANQUANT :
-❌ Section "RDV" séparée dans le dashboard courtier
-❌ Confirmation SMS après achat RDV
+❌ Confirmation SMS après achat RDV (Twilio non intégré)
 
 
 ----------------------------------------------------
@@ -122,6 +150,11 @@ SECTION 8 — ESPACE APPORTEUR (PROVIDER)
 
 IMPLÉMENTÉ :
 ✅ Soumission manuelle de leads (dashboard/provider/submit)
+✅ Toggle Lead/RDV sur le formulaire provider  ← Pass 5
+   - Mode RDV : champs canal PHONE/VISIO, date, créneaux disponibilité
+   - Consentement renforcé spécifique RDV
+   - Prix appointmentPrice auto-sélectionné
+   - Filtre produits compatibles RDV (hasAppointment=true)
 ✅ Import CSV : route API + bouton upload UI dans le dashboard provider  ← Pass 3
 ✅ Consentement obligatoire sur la soumission
 ✅ Validation automatique des champs requis
@@ -201,23 +234,28 @@ SECTION 12 — RÉCAPITULATIF MVP (ÉTAT ACTUEL)
 
 MVP COMPLET ✅ :
 - Catalogue 18 produits avec 18 formulaires dédiés
-- Salle de marché : achat, réservation, filtres catégorie/produit/fraîcheur/CP
+- Salle de marché : achat, réservation, filtres catégorie/produit/fraîcheur/CP/RDV
 - CRM courtier : liste, fiche /[id], CRM statuts, motif perte, consentement PDF
-- CRM apporteur : soumission manuelle + import CSV + stats + motifs refus + badge refusés
+- CRM apporteur : soumission manuelle + RDV + import CSV + stats + motifs refus + badge refusés
 - Consentement RGPD : IP, UA, URL, timestamp, texte, version, proofHash SHA-256, PDF
-- Consentement accessible côté apporteur (dialog détail + export PDF)  ← Pass 4
+- Consentement renforcé RDV : texte spécifique, accessible côté apporteur et courtier
 - Système de crédits + recharge Stripe
 - Notifications in-app (achat, vente, crédits bas, approbation, rejet)
 - Admin : modération leads avec motif rejet (dialog) + notifications apporteur
 - Audit log immuable : 8 actions journalisées + interface admin dédiée  ← Pass 4
 - API key provider : génération, révocation, endpoint public /api/v1/leads  ← Pass 4
+- RDV qualifiés complet  ← Pass 5 :
+  - Formulaire apporteur toggle Lead/RDV avec canal, date, créneaux, consentement renforcé
+  - API submit étendue : leadType APPOINTMENT, appointmentChannel, availabilities
+  - Marketplace : filtre RDV, badge canal/date sur les cartes, stats RDV
+  - Page courtier /dashboard/appointments dédiée
+  - Actions broker : Confirmer / Annuler avec email + audit log
+  - API PATCH /api/user/leads/[id]/appointment
+  - Emails différenciés : achat RDV, vente RDV, changement statut
+  - Lien sidebar + bouton dashboard "Mes RDV"
 
 À FAIRE ❌ (priorité basse / post-MVP) :
-1. RDV qualifiés complet :
-   - Formulaire public soumission RDV (créneaux, canal, consentement renforcé)
-   - Interface courtier dédiée RDV
-   - SMS confirmation RDV
-   - Filtre RDV sur la marketplace
-2. Achat direct CB sur la marketplace (sans recharge préalable)
-3. Rejet automatique avec règles configurables (doublons, champs manquants)
-4. Notifications temps-réel (WebSocket/SSE)
+1. Achat direct CB sur la marketplace (sans recharge préalable)
+2. Rejet automatique avec règles configurables (doublons, champs manquants)
+3. Notifications temps-réel (WebSocket/SSE)
+4. SMS de confirmation RDV (Twilio)

@@ -15,6 +15,7 @@ import {
   BarChart3,
   Shield,
   Key,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
     { name: "Salle de Marché", href: "/dashboard/marketplace", icon: ShoppingCart },
     { name: "Mes Leads", href: "/dashboard/leads", icon: Users },
+    { name: "Mes RDV", href: "/dashboard/appointments", icon: Calendar },
     { name: "Crédits & Factures", href: "/dashboard/billing", icon: CreditCard },
   ];
 

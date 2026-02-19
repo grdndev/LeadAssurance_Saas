@@ -14,7 +14,9 @@ import {
   Calendar,
   RefreshCw,
   Search,
-  Loader2
+  Loader2,
+  Phone,
+  Video,
 } from "lucide-react";
 import { PRODUCTS, getProductById } from "@/lib/constants/products";
 import { getLeadFreshness, isUltraFresh } from "@/lib/types/leads";
@@ -48,6 +50,7 @@ export default function MarketplacePage() {
   const [selectedProductType, setSelectedProductType] = useState("all");
   const [zipFilter, setZipFilter] = useState("");
   const [freshnessFilter, setFreshnessFilter] = useState("all");
+  const [leadTypeFilter, setLeadTypeFilter] = useState("all"); // "all" | "LEAD" | "APPOINTMENT"
   const [reservedLead, setReservedLead] = useState<string | null>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedLeadForPurchase, setSelectedLeadForPurchase] = useState<any | null>(null);
@@ -163,6 +166,8 @@ export default function MarketplacePage() {
     const matchesCategory = selectedCategory === "All" || product?.category === selectedCategory;
     const matchesProduct = selectedProductType === "all" || lead.productType === selectedProductType;
     const matchesZip = zipFilter === "" || lead.zipCode.startsWith(zipFilter);
+    const matchesLeadType = leadTypeFilter === "all" ||
+      (leadTypeFilter === "APPOINTMENT" ? (lead.leadType === "APPOINTMENT" || lead.isAppointment) : (lead.leadType !== "APPOINTMENT" && !lead.isAppointment));
 
     // Freshness filter
     let matchesFreshness = true;
@@ -172,7 +177,7 @@ export default function MarketplacePage() {
       matchesFreshness = new Date(lead.createdAt) >= cutoff;
     }
 
-    return matchesCategory && matchesProduct && matchesZip && matchesFreshness;
+    return matchesCategory && matchesProduct && matchesZip && matchesFreshness && matchesLeadType;
   });
 
   // Get unique product types for filter
@@ -198,7 +203,7 @@ export default function MarketplacePage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row">
+      <div className="flex flex-col gap-4 sm:flex-row flex-wrap">
         <div className="flex flex-wrap gap-2">
           {["All", "Crédit", "Assurance", "Patrimoine"].map((cat) => (
             <Button
@@ -209,6 +214,25 @@ export default function MarketplacePage() {
               className="rounded-full"
             >
               {cat === "All" ? "Tous" : cat}
+            </Button>
+          ))}
+        </div>
+
+        {/* Lead type filter */}
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: "all", label: "Leads + RDV" },
+            { value: "LEAD", label: "Leads" },
+            { value: "APPOINTMENT", label: "🗓 RDV Qualifiés" },
+          ].map((opt) => (
+            <Button
+              key={opt.value}
+              variant={leadTypeFilter === opt.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeadTypeFilter(opt.value)}
+              className={`rounded-full ${leadTypeFilter === opt.value && opt.value === "APPOINTMENT" ? "bg-purple-600 hover:bg-purple-700 border-purple-600" : ""}`}
+            >
+              {opt.label}
             </Button>
           ))}
         </div>
@@ -264,6 +288,7 @@ export default function MarketplacePage() {
       {/* Stats Bar */}
       <div className="flex items-center gap-6 text-sm text-muted-foreground">
         <span><strong className="text-foreground">{filteredLeads.length}</strong> leads disponibles</span>
+        <span><strong className="text-purple-600">{filteredLeads.filter(l => l.leadType === "APPOINTMENT" || l.isAppointment).length}</strong> RDV qualifiés</span>
         <span className="flex items-center gap-1">
           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
           Mise à jour en temps réel
@@ -339,6 +364,27 @@ export default function MarketplacePage() {
                           <span className="text-muted-foreground">Type</span>
                           <span className="text-foreground font-medium">{lead.isExclusive ? "Exclusif" : "Mutualisé"}</span>
                         </div>
+                        {(lead.leadType === "APPOINTMENT" || lead.isAppointment) && (
+                          <>
+                            {lead.appointmentChannel && (
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Canal</span>
+                                <span className="font-medium flex items-center gap-1 text-purple-600">
+                                  {lead.appointmentChannel === "PHONE" ? <Phone className="h-3 w-3" /> : <Video className="h-3 w-3" />}
+                                  {lead.appointmentChannel === "PHONE" ? "Téléphone" : "Visio"}
+                                </span>
+                              </div>
+                            )}
+                            {lead.appointmentDate && (
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">RDV souhaité</span>
+                                <span className="font-medium text-purple-600">
+                                  {new Date(lead.appointmentDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
 
                       <div className="flex items-center justify-between border-t border-border/50 pt-4">

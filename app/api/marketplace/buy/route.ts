@@ -125,20 +125,44 @@ export async function POST(req: Request) {
 
         // 8. Envoi des emails (en asynchrone hors de la transaction)
         const templates = emailTemplates;
+        const isRdv = result.lead.leadType === "APPOINTMENT";
 
         // Email au courtier
-        sendEmail({
-            to: (session.user as any).email,
-            ...templates.leadPurchase(session.user?.name || "Courtier", result.lead.productType)
-        });
+        if (isRdv) {
+            sendEmail({
+                to: (session.user as any).email,
+                ...templates.appointmentPurchased(
+                    session.user?.name || "Courtier",
+                    result.lead.productType,
+                    result.lead.appointmentDate?.toISOString() || null,
+                    result.lead.appointmentChannel
+                )
+            });
+        } else {
+            sendEmail({
+                to: (session.user as any).email,
+                ...templates.leadPurchase(session.user?.name || "Courtier", result.lead.productType)
+            });
+        }
 
         // Email à l'apporteur
-        sendEmail({
-            to: result.provider.email,
-            ...templates.leadSale(result.provider.name || "Apporteur", result.lead.productType, result.lead.price)
+        if (isRdv) {
+            sendEmail({
+                to: result.provider.email,
+                ...templates.appointmentSold(result.provider.name || "Apporteur", result.lead.productType, result.lead.price)
+            });
+        } else {
+            sendEmail({
+                to: result.provider.email,
+                ...templates.leadSale(result.provider.name || "Apporteur", result.lead.productType, result.lead.price)
+            });
+        }
+
+        return NextResponse.json({
+            message: isRdv ? "Achat du RDV réussi" : "Achat réussi",
+            lead: result.lead
         });
 
-        return NextResponse.json({ message: "Achat réussi", lead: result.lead });
     } catch (error: any) {
         console.error("Purchase error:", error);
         return NextResponse.json({ error: error.message || "Erreur lors de l'achat" }, { status: 400 });

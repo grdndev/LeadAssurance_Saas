@@ -28,9 +28,13 @@ export async function GET(req: Request) {
             zipCode: lead.zipCode.substring(0, 2) + "xxx",
             price: lead.price,
             isAppointment: lead.isAppointment,
+            leadType: lead.leadType,
+            appointmentChannel: lead.appointmentChannel,
+            appointmentDate: lead.appointmentDate,
+            appointmentStatus: lead.appointmentStatus,
             isExclusive: lead.isExclusive,
             createdAt: lead.createdAt,
-            freshness: lead.createdAt, // Utilsé pour calculer la fraîcheur côté client
+            freshness: lead.createdAt,
         }));
 
         return NextResponse.json({ leads: sanitizedLeads });
