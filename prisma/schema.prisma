@@ -31,6 +31,7 @@ model User {
   reservations  MarketplaceReservation[]
   transactions  Transaction[]
   notifications Notification[]
+  apiKeys       ApiKey[]
 
   // NextAuth
   emailVerified DateTime?
@@ -212,4 +213,21 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([userId])
   @@index([createdAt])
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   // Label for this key (e.g. "CRM Integration", "Website Form")
+  key         String   @unique  // The actual API key (hashed prefix + random)
+  prefix      String   // First 8 chars shown in UI (e.g. "la_abc123")
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?  // null = never expires
+  active      Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([key])
 }

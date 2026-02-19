@@ -15,6 +15,9 @@ export async function GET() {
             where: {
                 providerId: (session.user as any).id,
             },
+            include: {
+                consent: true,
+            },
             orderBy: {
                 createdAt: "desc",
             },

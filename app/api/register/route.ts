@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
     try {
@@ -34,6 +35,15 @@ export async function POST(req: Request) {
                 role: role.toUpperCase(), // "BROKER" or "PROVIDER"
                 credits: role.toUpperCase() === "BROKER" ? 0 : 0,
             },
+        });
+
+        writeAuditLog({
+            userId: user.id,
+            action: "USER_REGISTERED",
+            entityType: "User",
+            entityId: user.id,
+            details: { email: user.email, role: user.role },
+            ipAddress: req.headers.get("x-forwarded-for") || undefined,
         });
 
         return NextResponse.json(

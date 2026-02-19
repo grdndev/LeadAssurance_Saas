@@ -13,7 +13,8 @@ import {
   CreditCard,
   Upload,
   BarChart3,
-  Shield
+  Shield,
+  Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Envoyer un Lead", href: "/dashboard/provider/submit", icon: Upload },
     { name: "Mes Leads", href: "/dashboard/provider/leads", icon: FileText },
     { name: "Statistiques", href: "/dashboard/provider/stats", icon: BarChart3 },
+    { name: "Clés API", href: "/dashboard/provider/apikeys", icon: Key },
   ];
 
   const navigation = isProvider ? providerNavigation : brokerNavigation;

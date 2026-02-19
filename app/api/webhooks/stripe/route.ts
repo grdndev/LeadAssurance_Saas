@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
+import { writeAuditLog } from "@/lib/audit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-01-27.acacia" as any,
@@ -52,6 +53,13 @@ export async function POST(req: Request) {
                         },
                     }),
                 ]);
+                writeAuditLog({
+                    userId,
+                    action: "CREDIT_RECHARGED",
+                    entityType: "Transaction",
+                    entityId: session.id,
+                    details: { credits, amountHT, stripeSessionId: session.id },
+                });
                 console.log(`✅ Credits and Transaction updated for user ${userId}: ${credits} credits`);
             } catch (error) {
                 console.error(`❌ Failed to update credits for user ${userId}:`, error);

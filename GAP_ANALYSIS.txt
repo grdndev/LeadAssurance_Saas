@@ -1,6 +1,6 @@
 ====================================================
 GAP ANALYSIS — LeadsAssurance.com
-CDC vs. Workspace (19/02/2026) — Updated Pass 3
+CDC vs. Workspace (19/02/2026) — Updated Pass 4 (Post-MVP)
 ====================================================
 
 ----------------------------------------------------
@@ -130,11 +130,16 @@ IMPLÉMENTÉ :
 ✅ Motifs de rejet affichés à l'apporteur (rejectionReason DB + UI)  ← Pass 2
 ✅ Notification apporteur quand lead approuvé ou rejeté  ← Pass 3
 ✅ proofHash calculé à la soumission manuelle et CSV  ← Pass 2/3
+✅ Reporting refusés : badge compteur refusés dans la liste, motif visible  ← Pass 4
+✅ API externe apporteur sécurisée par API key :  ← Pass 4
+   - Modèle ApiKey (DB : id, userId, name, key SHA-256, prefix, lastUsedAt, active)
+   - GET/POST/DELETE /api/user/provider/apikeys (liste, création, révocation)
+   - POST /api/v1/leads (endpoint public authentifié par Bearer API key)
+   - Page dashboard/provider/apikeys avec doc intégrée + affichage unique de la clé
+   - Lien "Clés API" dans la sidebar provider
 
 MANQUANT :
-❌ API externe apporteur sécurisée par API key (pour intégrations tierces)
 ❌ Rejet automatique avec règles configurables (doublons, champs manquants)
-❌ Reporting des leads refusés avec motifs dans espace apporteur
 
 
 ----------------------------------------------------
@@ -148,11 +153,10 @@ IMPLÉMENTÉ :
 ✅ Versioning du consentement (consentVersion @default("1.0"))
 ✅ Hash SHA-256 (proofHash) calculé et stocké sur tous les chemins de création
 ✅ Preuve consultable (courtier : liste + fiche détail /leads/[id])
+✅ Preuve consultable côté apporteur (dialog détail dans provider/leads)  ← Pass 4
 ✅ Export PDF de preuve (ConsentPDF via @react-pdf/renderer)
 ✅ Consentement lié à chaque lead (relation Consent ↔ Lead 1-to-1)
-
-MANQUANT :
-❌ Preuve de consentement accessible côté apporteur (uniquement courtier)
+✅ Export PDF disponible côté apporteur dans le dialog détail  ← Pass 4
 
 
 ----------------------------------------------------
@@ -164,11 +168,15 @@ IMPLÉMENTÉ :
 ✅ lib/audit.ts avec writeAuditLog() helper non-bloquant (jamais bloquant)
 ✅ Journalisé sur : LEAD_APPROVED, LEAD_REJECTED, LEAD_PURCHASED,
                     BROKER_STATUS_CHANGED  ← Pass 3
-
-MANQUANT :
-❌ Interface admin pour consulter les logs d'audit (UI non créée)
-❌ Logging sur : LEAD_SUBMITTED, CREDIT_RECHARGED, USER_REGISTERED,
-                 DISPUTE_OPENED / RESOLVED
+✅ Journalisé sur : LEAD_SUBMITTED (submit manuel + API key)  ← Pass 4
+✅ Journalisé sur : CREDIT_RECHARGED (stripe webhook)  ← Pass 4
+✅ Journalisé sur : USER_REGISTERED (register route)  ← Pass 4
+✅ Journalisé sur : DISPUTE_RESOLVED (admin disputes PATCH)  ← Pass 4
+✅ Interface admin pour consulter les logs d'audit :  ← Pass 4
+   - Onglet "Audit Log" dans l'admin dashboard
+   - GET /api/admin/audit avec pagination
+   - Couleurs par type d'action, détails JSON, IP, timestamps
+   - Activité récente affichée dans l'onglet "Vue d'ensemble"
 
 
 ----------------------------------------------------
@@ -195,12 +203,14 @@ MVP COMPLET ✅ :
 - Catalogue 18 produits avec 18 formulaires dédiés
 - Salle de marché : achat, réservation, filtres catégorie/produit/fraîcheur/CP
 - CRM courtier : liste, fiche /[id], CRM statuts, motif perte, consentement PDF
-- CRM apporteur : soumission manuelle + import CSV + stats + motifs refus
+- CRM apporteur : soumission manuelle + import CSV + stats + motifs refus + badge refusés
 - Consentement RGPD : IP, UA, URL, timestamp, texte, version, proofHash SHA-256, PDF
+- Consentement accessible côté apporteur (dialog détail + export PDF)  ← Pass 4
 - Système de crédits + recharge Stripe
 - Notifications in-app (achat, vente, crédits bas, approbation, rejet)
-- Admin : modération leads avec motif rejet + notifications apporteur
-- Audit log immuable (modèle DB + helper + 4 actions journalisées)
+- Admin : modération leads avec motif rejet (dialog) + notifications apporteur
+- Audit log immuable : 8 actions journalisées + interface admin dédiée  ← Pass 4
+- API key provider : génération, révocation, endpoint public /api/v1/leads  ← Pass 4
 
 À FAIRE ❌ (priorité basse / post-MVP) :
 1. RDV qualifiés complet :
@@ -209,7 +219,5 @@ MVP COMPLET ✅ :
    - SMS confirmation RDV
    - Filtre RDV sur la marketplace
 2. Achat direct CB sur la marketplace (sans recharge préalable)
-3. API externe apporteur sécurisée par API key
-4. Interface admin logs d'audit
-5. Notifications temps-réel (WebSocket/SSE)
-6. Rejet automatique avec règles configurables
+3. Rejet automatique avec règles configurables (doublons, champs manquants)
+4. Notifications temps-réel (WebSocket/SSE)

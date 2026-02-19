@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
     try {
@@ -73,6 +74,15 @@ export async function POST(req: Request) {
                     },
                 },
             },
+        });
+
+        writeAuditLog({
+            userId: (session.user as any).id,
+            action: "LEAD_SUBMITTED",
+            entityType: "Lead",
+            entityId: lead.id,
+            details: { productType, price: lead.price },
+            ipAddress,
         });
 
         return NextResponse.json(

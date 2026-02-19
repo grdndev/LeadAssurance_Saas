@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET() {
     try {
@@ -81,6 +82,14 @@ export async function PATCH(request: Request) {
                 data: { status: "RESOLVED_REJECTED" }
             });
         }
+
+        writeAuditLog({
+            userId: (session.user as any).id,
+            action: "DISPUTE_RESOLVED",
+            entityType: "Dispute",
+            entityId: disputeId,
+            details: { resolution, leadId: dispute.leadId, refunded: resolution === "REFUND" },
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {

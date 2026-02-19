@@ -15,7 +15,9 @@ import {
     Loader2,
     RefreshCw,
     Pencil,
-    Save
+    Save,
+    Download,
+    ShieldCheck,
 } from "lucide-react";
 import { PRODUCTS, getProductById } from "@/lib/constants/products";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,6 +39,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const statusConfig = {
     STOCK: { label: "En stock", color: "bg-blue-500", icon: CheckCircle2 },
@@ -120,6 +123,18 @@ export default function ProviderLeadsPage() {
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editForm, setEditForm] = useState<any>({});
     const [editSaving, setEditSaving] = useState(false);
+    const [PDFDownloadLink, setPDFDownloadLink] = useState<any>(null);
+    const [ConsentPDF, setConsentPDF] = useState<any>(null);
+
+    useEffect(() => {
+        Promise.all([
+            import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
+            import("@/components/leads/ConsentPDF").then((m) => m.ConsentPDF),
+        ]).then(([PDFLink, Consent]) => {
+            setPDFDownloadLink(() => PDFLink);
+            setConsentPDF(() => Consent);
+        });
+    }, []);
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -190,6 +205,7 @@ export default function ProviderLeadsPage() {
         .filter(l => l.status === "SOLD")
         .reduce((sum, l) => sum + (l.price * 0.5), 0);
     const soldCount = leads.filter(l => l.status === "SOLD").length;
+    const rejectedCount = leads.filter(l => l.status === "REJECTED").length;
 
     return (
         <div className="space-y-8">
@@ -202,6 +218,11 @@ export default function ProviderLeadsPage() {
                     <Badge variant="outline" className="px-4 py-2 bg-green-500/10 text-green-500 border-green-500/20">
                         {soldCount} vendus • {totalRevenue.toFixed(2)}€ gagnés
                     </Badge>
+                    {rejectedCount > 0 && (
+                        <Badge variant="outline" className="px-4 py-2 bg-red-500/10 text-red-500 border-red-500/20">
+                            {rejectedCount} refusé(s)
+                        </Badge>
+                    )}
                     <Button variant="outline" size="sm" onClick={fetchLeads} className="rounded-full">
                         <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                     </Button>
@@ -355,7 +376,7 @@ export default function ProviderLeadsPage() {
                                     <p className="font-medium">{selectedLead.zipCode} {selectedLead.city}</p>
                                 </div>
                                 <div className="p-3 bg-secondary rounded-lg">
-                                    <p className="text-xs text-muted-foreground">Date d'envoi</p>
+                                    <p className="text-xs text-muted-foreground">Date d&apos;envoi</p>
                                     <p className="font-medium">{new Date(selectedLead.createdAt).toLocaleString("fr-FR")}</p>
                                 </div>
                                 <div className="p-3 bg-secondary rounded-lg">
@@ -386,6 +407,50 @@ export default function ProviderLeadsPage() {
                                         Lead refusé
                                     </div>
                                     <p className="text-sm mt-2">{selectedLead.rejectionReason || "Les informations fournies ne permettent pas la validation de ce prospect selon nos critères de qualité."}</p>
+                                </div>
+                            )}
+
+                            {/* RGPD Consent Proof */}
+                            {selectedLead.consent && (
+                                <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20 space-y-3">
+                                    <p className="flex items-center gap-2 font-semibold text-green-700 dark:text-green-400">
+                                        <ShieldCheck className="h-4 w-4" /> Preuve de Consentement RGPD
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                            <p className="text-muted-foreground">Date</p>
+                                            <p className="font-mono">{new Date(selectedLead.consent.timestamp).toLocaleString("fr-FR")}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground">IP</p>
+                                            <p className="font-mono">{selectedLead.consent.ipAddress}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs">
+                                        <p className="text-muted-foreground mb-1">Hash SHA-256</p>
+                                        {selectedLead.consent.proofHash ? (
+                                            <p className="font-mono break-all text-muted-foreground">{selectedLead.consent.proofHash.slice(0, 32)}…</p>
+                                        ) : (
+                                            <p className="italic text-muted-foreground">Non disponible (lead antérieur)</p>
+                                        )}
+                                    </div>
+                                    {PDFDownloadLink && ConsentPDF && (
+                                        <PDFDownloadLink
+                                            document={<ConsentPDF lead={selectedLead} consent={selectedLead.consent} />}
+                                            fileName={`preuve-consentement-${selectedLead.id}.pdf`}
+                                            className="w-full block"
+                                        >
+                                            {({ loading: pdfLoading }: { loading: boolean }) => (
+                                                <button
+                                                    disabled={pdfLoading}
+                                                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-60"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    {pdfLoading ? "Génération..." : "Télécharger certificat PDF"}
+                                                </button>
+                                            )}
+                                        </PDFDownloadLink>
+                                    )}
                                 </div>
                             )}
 
