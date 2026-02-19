@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { sseClients } from "./sse";
 
 export type NotificationType =
   | "LEAD_PURCHASED"
@@ -30,6 +31,9 @@ export async function createNotification(params: CreateNotificationParams) {
         link: params.link,
       },
     });
+
+    // Push to any live SSE connections for this user (non-blocking)
+    sseClients.send(params.userId, "notification", notification);
 
     return notification;
   } catch (error) {

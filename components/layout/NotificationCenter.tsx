@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Bell, Check, CheckCheck, X } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Bell, Check, CheckCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,17 +23,32 @@ interface Notification {
   createdAt: string;
 }
 
+const NOTIFICATION_ICONS: Record<string, string> = {
+  LEAD_PURCHASED: "🛒",
+  LEAD_SOLD: "💰",
+  CREDIT_LOW: "⚠️",
+  DISPUTE_OPENED: "⚖️",
+  LEAD_APPROVED: "✅",
+  LEAD_REJECTED: "❌",
+  APPOINTMENT_CONFIRMED: "📅",
+  APPOINTMENT_CANCELLED: "🚫",
+};
+
 export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const esRef = useRef<EventSource | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/notifications");
@@ -41,19 +57,59 @@ export function NotificationCenter() {
         setNotifications(data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
       }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const connect = useCallback(() => {
+    if (esRef.current) return;
+
+    const es = new EventSource("/api/notifications/stream");
+    esRef.current = es;
+
+    es.addEventListener("connected", () => {
+      setConnected(true);
+    });
+
+    es.addEventListener("notification", (e) => {
+      try {
+        const notif: Notification = JSON.parse(e.data);
+        setNotifications((prev) => [notif, ...prev.slice(0, 49)]);
+        setUnreadCount((prev) => prev + 1);
+        toast(notif.title, {
+          description: notif.message,
+          duration: 5000,
+          action: notif.link
+            ? { label: "Voir", onClick: () => { window.location.href = notif.link!; } }
+            : undefined,
+        });
+      } catch {
+        // malformed payload
+      }
+    });
+
+    es.onerror = () => {
+      setConnected(false);
+      es.close();
+      esRef.current = null;
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = setTimeout(connect, 5_000);
+    };
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     fetchNotifications();
-    // Poll for new notifications every 60 seconds
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
-  }, []);
+    connect();
+    return () => {
+      esRef.current?.close();
+      esRef.current = null;
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+    };
+  }, [mounted, fetchNotifications, connect]);
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -69,9 +125,7 @@ export function NotificationCenter() {
         );
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
+    } catch { /* silent */ }
   };
 
   const markAllAsRead = async () => {
@@ -86,28 +140,7 @@ export function NotificationCenter() {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
       }
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-    }
-  };
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "LEAD_PURCHASED":
-        return "🛒";
-      case "LEAD_SOLD":
-        return "💰";
-      case "CREDIT_LOW":
-        return "⚠️";
-      case "DISPUTE_OPENED":
-        return "⚖️";
-      case "LEAD_APPROVED":
-        return "✅";
-      case "LEAD_REJECTED":
-        return "❌";
-      default:
-        return "📢";
-    }
+    } catch { /* silent */ }
   };
 
   // Prevent hydration mismatch by not rendering until mounted
@@ -124,13 +157,16 @@ export function NotificationCenter() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button 
           className="relative inline-flex items-center justify-center rounded-md p-2 hover:bg-accent hover:text-accent-foreground transition-colors" 
           aria-label="Notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className={`h-5 w-5 ${connected ? "" : "opacity-50"}`} />
+          {connected && (
+            <span className="absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full bg-green-500" />
+          )}
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -140,7 +176,15 @@ export function NotificationCenter() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-95 max-h-150 overflow-hidden flex flex-col p-0" sideOffset={8}>
         <div className="sticky top-0 bg-background border-b px-4 py-3 flex items-center justify-between z-10">
-          <h3 className="font-semibold text-sm">Notifications</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">Notifications</h3>
+            {connected && (
+              <span className="flex items-center gap-1 text-[10px] text-green-600 font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                Live
+              </span>
+            )}
+          </div>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -149,7 +193,7 @@ export function NotificationCenter() {
               className="text-xs h-7"
             >
               <CheckCheck className="h-3 w-3 mr-1" />
-              Tout marquer comme lu
+              Tout lire
             </Button>
           )}
         </div>
@@ -175,7 +219,7 @@ export function NotificationCenter() {
                 >
                   <div className="flex gap-3">
                     <div className="text-2xl shrink-0">
-                      {getNotificationIcon(notification.type)}
+                      {NOTIFICATION_ICONS[notification.type] ?? "📢"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
