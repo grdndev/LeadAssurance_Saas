@@ -15,7 +15,7 @@ export default function MutuelleSanteIndPage() {
                 description: "Comparez les meilleures mutuelles santé pour vous et vos proches",
                 fields: [
                     { name: "peopleCount", label: "Nombre de personnes à couvrir", type: "number", required: true, placeholder: "Ex: 2" },
-                    { name: "age", label: "Âge du/des assuré(s)", type: "text", required: true, placeholder: "Ex: 35, 32 (séparer par des virgules)" },
+                    { name: "ages", label: "Âge(s) des assuré(s)", type: "text", required: true, placeholder: "Ex: 35, 32, 8 (séparer par virgule)" },
                     { name: "regime", label: "Régime", type: "select", required: true, options: ["Salarié", "TNS", "Retraité"] },
                     { name: "priority", label: "Priorité de couverture", type: "select", required: true, options: ["Optique", "Dentaire", "Hospitalisation", "Équilibrée"] },
                 ],

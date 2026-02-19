@@ -103,7 +103,7 @@ export async function POST(req: Request) {
                         consentText,
                         ipAddress,
                         userAgent,
-                        urlSource: urlSource || "manual_injection",
+                        urlSource: urlSource || "provider-dashboard",
                         proofHash,
                     },
                 },

@@ -114,7 +114,7 @@ export const PRODUCTS: ProductDefinition[] = [
     appointmentPrice: 35,
     fields: [
       { name: "peopleCount", label: "Nombre de personnes à couvrir", type: "number" },
-      { name: "age", label: "Âge de l'assuré principal", type: "number" },
+      { name: "ages", label: "Âge(s) des assuré(s)", type: "text", placeholder: "Ex: 35, 32, 8 (séparer par virgule)" },
       { name: "regime", label: "Régime", type: "select", options: ["Salarié", "TNS", "Retraité"] },
       { name: "priority", label: "Priorité", type: "select", options: ["Optique", "Dentaire", "Hospitalisation"] },
     ]

@@ -13,9 +13,8 @@ IMPLÉMENTÉ :
 ✅ Fraîcheur visible sur la marketplace (badge "ultra-frais", "frais", etc.)
 ✅ Conformité RGPD : consentement explicite, IP, user-agent, URL source, horodatage
 ✅ Hash SHA-256 (proofHash) calculé à la soumission (submit, leads/route.ts, import CSV)
-
-MANQUANT :
-⚠️  Transparence des prix côté front public (page /tarifs à vérifier)
+✅ Transparence des prix : page /tarifs complète avec grille tarifaire par catégorie,
+   option RDV qualifié, FAQ et lien dans la Navbar publique
 
 
 ----------------------------------------------------
@@ -31,10 +30,8 @@ IMPLÉMENTÉ :
    PREVOYANCE_TNS, RC_DECENNALE, RC_PRO,
    CREDIT_IMMO, RACHAT_CREDIT, CREDIT_PRO, ASSURANCE_EMPRUNTEUR,
    MUTUELLE_SANTE_IND, MUTUELLE_ENTREPRISE  (ajoutés en Pass 2)
-
-MANQUANT / INCOMPLET :
-⚠️  MUTUELLE_SANTE_IND : le CDC demande "âge de(s) assuré(s)" (pluriel).
-    Le formulaire recueille un seul champ "age" — acceptable pour MVP.
+✅ MUTUELLE_SANTE_IND : champ "ages" (texte, virgule-séparé) pour plusieurs assurés,
+   aligné avec le CDC — products.ts + page formulaire mis à jour
 
 
 ----------------------------------------------------
@@ -45,10 +42,8 @@ IMPLÉMENTÉ :
 ✅ Prénom, Nom, Téléphone, Email, Code postal, Ville — tous dans le modèle Lead
 ✅ Consentement : case non pré-cochée, texte, horodatage, IP, user-agent, URL source
 ✅ Versioning du consentement : champ consentVersion @default("1.0") dans Consent
-
-MANQUANT :
-⚠️  Certains formulaires provider passent "manual_injection" comme urlSource.
-    Acceptable pour l'espace apporteur.
+✅ urlSource provider : le formulaire dashboard envoie window.location.href ;
+   fallback API submit corrigé en "provider-dashboard" (plus "manual_injection")
 
 
 ----------------------------------------------------
@@ -120,7 +115,6 @@ IMPLÉMENTÉ :
 
 MANQUANT :
 ❌ Paiement direct par CB (uniquement via recharge de crédits Stripe)
-⚠️  Filtre "RDV" implémenté en Pass 5 — complété
 
 
 ----------------------------------------------------
@@ -224,8 +218,6 @@ IMPLÉMENTÉ :
 ✅ Déclenchement : approbation/rejet admin → notification apporteur  ← Pass 3
 ✅ NotificationCenter dans le dashboard (cloche)
 
-MANQUANT :
-❌ Notification temps-réel (WebSocket / SSE) — actuellement polling uniquement
 
 
 ----------------------------------------------------
@@ -234,13 +226,16 @@ SECTION 12 — RÉCAPITULATIF MVP (ÉTAT ACTUEL)
 
 MVP COMPLET ✅ :
 - Catalogue 18 produits avec 18 formulaires dédiés
+  - MUTUELLE_SANTE_IND : champ ages (texte, virgule-séparé) pour plusieurs assurés  ← Pass 6
 - Salle de marché : achat, réservation, filtres catégorie/produit/fraîcheur/CP/RDV
 - CRM courtier : liste, fiche /[id], CRM statuts, motif perte, consentement PDF
 - CRM apporteur : soumission manuelle + RDV + import CSV + stats + motifs refus + badge refusés
 - Consentement RGPD : IP, UA, URL, timestamp, texte, version, proofHash SHA-256, PDF
+  - urlSource provider : window.location.href ; fallback "provider-dashboard"  ← Pass 6
 - Consentement renforcé RDV : texte spécifique, accessible côté apporteur et courtier
 - Système de crédits + recharge Stripe
-- Notifications in-app (achat, vente, crédits bas, approbation, rejet)
+- Transparence des prix : page /tarifs publique avec grille par catégorie + Navbar  ← Pass 6
+- Notifications in-app temps réel SSE (achat, vente, crédits bas, approbation, rejet)  ← Pass 6
 - Admin : modération leads avec motif rejet (dialog) + notifications apporteur
 - Audit log immuable : 8 actions journalisées + interface admin dédiée  ← Pass 4
 - API key provider : génération, révocation, endpoint public /api/v1/leads  ← Pass 4
@@ -257,5 +252,4 @@ MVP COMPLET ✅ :
 À FAIRE ❌ (priorité basse / post-MVP) :
 1. Achat direct CB sur la marketplace (sans recharge préalable)
 2. Rejet automatique avec règles configurables (doublons, champs manquants)
-3. Notifications temps-réel (WebSocket/SSE)
-4. SMS de confirmation RDV (Twilio)
+3. SMS de confirmation RDV (Twilio)
