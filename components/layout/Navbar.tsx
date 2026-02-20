@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Menu, Search } from "lucide-react";
+import { ShieldCheck, Menu, X, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { NotificationCenter } from "./NotificationCenter";
 
@@ -10,6 +11,7 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
   const userRole = session?.user?.role;
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const getInitials = (name: string) => {
     return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?";
@@ -110,11 +112,95 @@ export function Navbar() {
               </Link>
             </>
           )}
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label="Menu"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
       </div>
+
+      {/* Mobile nav panel */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur px-4 pb-4 pt-2 space-y-1">
+          {isLoggedIn ? (
+            <>
+              <Link
+                href="/dashboard/marketplace"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Salle de Marché
+              </Link>
+              {userRole === "BROKER" && (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  Espace Courtier
+                </Link>
+              )}
+              {userRole === "PROVIDER" && (
+                <Link
+                  href="/dashboard/provider"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  Espace Apporteur
+                </Link>
+              )}
+            </>
+          ) : (
+            <>
+              <Link
+                href="/dashboard/marketplace"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Salle de Marché
+              </Link>
+              <Link
+                href="/#produits"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Produits
+              </Link>
+              <Link
+                href="/tarifs"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Tarifs
+              </Link>
+              <Link
+                href="/blog"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Blog
+              </Link>
+              <div className="pt-2 flex gap-2">
+                <Link href="/login" className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => setMobileOpen(false)}>
+                    Connexion
+                  </Button>
+                </Link>
+                <Link href="/register" className="flex-1">
+                  <Button size="sm" className="w-full" onClick={() => setMobileOpen(false)}>
+                    Démarrer
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 }

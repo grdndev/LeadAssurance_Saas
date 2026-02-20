@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -16,7 +16,9 @@ import {
   Search,
   Upload,
   FileText,
-  BarChart3
+  BarChart3,
+  Calendar,
+  Key,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -27,9 +29,14 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
+
+  // Close sidebar on mobile when navigating
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   // Determine if it's a provider or broker dashboard based on URL
   const isProvider = pathname?.includes("/provider");
@@ -54,7 +61,9 @@ export default function DashboardLayout({
     { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
     { name: "Salle de Marché", href: "/dashboard/marketplace", icon: ShoppingCart },
     { name: "Mes Leads", href: "/dashboard/leads", icon: Users },
+    { name: "Mes RDV", href: "/dashboard/appointments", icon: Calendar },
     { name: "Crédits & Factures", href: "/dashboard/billing", icon: CreditCard },
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
   ];
 
   const providerNavigation = [
@@ -62,6 +71,8 @@ export default function DashboardLayout({
     { name: "Envoyer un Lead", href: "/dashboard/provider/submit", icon: Upload },
     { name: "Mes Leads", href: "/dashboard/provider/leads", icon: FileText },
     { name: "Statistiques", href: "/dashboard/provider/stats", icon: BarChart3 },
+    { name: "Clés API", href: "/dashboard/provider/apikeys", icon: Key },
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
   ];
 
   const navigation = isProvider ? providerNavigation : brokerNavigation;
@@ -72,6 +83,15 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-secondary/30 text-foreground">
+      {/* Backdrop overlay — mobile only, closes sidebar when tapped */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-background border-r border-border transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-16 items-center justify-between px-6 border-b border-border">
