@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -73,7 +73,7 @@ model Session {
 
 model Lead {
   id              String         @id @default(cuid())
-  productType     String         // Enum became String for SQLite
+  productType     String         // ASSURANCE_AUTO, ASSURANCE_HABITATION, etc.
   status          String         @default("PENDING_APPROVAL") // PENDING_APPROVAL, STOCK, SOLD, DISPUTED, REJECTED
 
   // Lead Type (LEAD or APPOINTMENT)
@@ -88,7 +88,7 @@ model Lead {
   city            String
 
   // Dynamic Attributes
-  attributes      String         // JSON stringified for SQLite (no native JSON)
+  attributes      String         // JSON stringified
 
   // Appointment-specific fields (only for leadType = APPOINTMENT)
   appointmentDate     DateTime?
