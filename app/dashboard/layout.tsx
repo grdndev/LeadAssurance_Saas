@@ -132,23 +132,17 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        {/* Admin or Switching Role feature */}
-        <div className="px-4 mt-6 space-y-2">
-          {userRole === "ADMIN" && (
+        {/* Admin shortcut */}
+        {userRole === "ADMIN" && (
+          <div className="px-4 mt-6">
             <Link
               href="/admin"
               className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-medium text-red-500 hover:text-red-600 transition-colors border border-dashed border-red-500/30 rounded-lg"
             >
               Administration
             </Link>
-          )}
-          <Link
-            href={isProvider ? "/dashboard" : "/dashboard/provider"}
-            className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-medium text-muted-foreground hover:text-primary transition-colors border border-dashed border-border rounded-lg"
-          >
-            Basculer vers {isProvider ? "Courtier" : "Apporteur"}
-          </Link>
-        </div>
+          </div>
+        )}
 
         <div className="absolute bottom-0 w-full p-4 border-t border-border">
           <Link
