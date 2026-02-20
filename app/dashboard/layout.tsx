@@ -20,9 +20,16 @@ import {
   Calendar,
   Key,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
+
+// Routes that only BROKERs may access
+const BROKER_ONLY = ["/dashboard/leads", "/dashboard/appointments", "/dashboard/billing"];
+// Routes that only PROVIDERs may access
+const PROVIDER_ONLY_PREFIX = "/dashboard/provider";
+// Routes shared by all authenticated roles
+const SHARED = ["/dashboard/marketplace", "/dashboard/notifications"];
 
 export default function DashboardLayout({
   children,
@@ -31,21 +38,53 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, status } = useSession();
+
+  const userRole = (session?.user as any)?.role as string | undefined;
 
   // Close sidebar on mobile when navigating
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  // Determine if it's a provider or broker dashboard based on URL
-  const isProvider = pathname?.includes("/provider");
-  const userRole = (session?.user as any)?.role;
-  
+  // ── Role-based redirect ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (status !== "authenticated" || !userRole) return;
+
+    const isShared = SHARED.some((s) => pathname?.startsWith(s));
+    if (isShared) return;
+
+    if (userRole === "PROVIDER") {
+      // Provider landing on /dashboard (broker home) → send to provider home
+      if (pathname === "/dashboard") {
+        router.replace("/dashboard/provider");
+        return;
+      }
+      // Provider trying to access a broker-only route
+      if (BROKER_ONLY.some((r) => pathname?.startsWith(r))) {
+        router.replace("/dashboard/provider");
+        return;
+      }
+    }
+
+    if (userRole === "BROKER") {
+      // Broker trying to access a provider-only route
+      if (pathname?.startsWith(PROVIDER_ONLY_PREFIX)) {
+        router.replace("/dashboard");
+        return;
+      }
+    }
+  }, [status, userRole, pathname, router]);
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // Nav is based on actual role, not URL
+  const isProvider = userRole === "PROVIDER";
+
   // Check if on marketplace and not authenticated
   const isMarketplace = pathname === "/dashboard/marketplace";
   const isAuthenticated = status === "authenticated";
-  
+
   // If on marketplace and not authenticated, show simplified layout
   if (isMarketplace && !isAuthenticated) {
     return (
@@ -53,6 +92,15 @@ export default function DashboardLayout({
         <main className="p-6 lg:p-10">
           {children}
         </main>
+      </div>
+    );
+  }
+
+  // Show nothing while session resolves (avoids flash of wrong nav)
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-secondary/30 flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
