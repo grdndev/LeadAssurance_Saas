@@ -14,6 +14,7 @@ async function main() {
         create: {
             email: 'admin@leadsassurance.com',
             name: 'Administrateur',
+	    password: adminPassword,
             role: Role.ADMIN,
             credits: 0,
         },
@@ -28,6 +29,7 @@ async function main() {
         create: {
             email: 'courtier@test.com',
             name: 'Jean Courtier',
+	    password: brokerPassword,
             role: Role.BROKER,
             credits: 500, // 500€ de crédits pour tester
         },
@@ -42,6 +44,7 @@ async function main() {
         create: {
             email: 'apporteur@test.com',
             name: 'Marie Apporteur',
+	    password: providerPassword,
             role: Role.PROVIDER,
             credits: 0,
         },
@@ -60,14 +63,14 @@ async function main() {
             email: 'pierre.dupont@email.com',
             zipCode: '75008',
             city: 'Paris',
-            attributes: {
+            attributes: JSON.stringify({
                 projectType: 'Résidence principale',
                 amount: 300000,
                 apport: true,
                 situationPro: 'Salarié CDI',
                 income: 4500,
                 delay: 'Immédiat',
-            },
+            }),
             isAppointment: false,
             isExclusive: false, // En salle de marché
             price: 45,
@@ -97,12 +100,12 @@ async function main() {
             email: 'sophie.martin@email.com',
             zipCode: '69002',
             city: 'Lyon',
-            attributes: {
+            attributes: JSON.stringify({
                 requestType: 'Changement',
                 loanAmount: 200000,
                 age: 34,
                 smoker: false,
-            },
+            }),
             isAppointment: true, // RDV qualifié
             isExclusive: false,
             price: 55,
@@ -132,12 +135,12 @@ async function main() {
             email: 'lucas.bernard@email.com',
             zipCode: '13008',
             city: 'Marseille',
-            attributes: {
+            attributes: JSON.stringify({
                 peopleCount: 3,
                 age: 42,
                 regime: 'TNS',
                 priority: 'Optique',
-            },
+            }),
             isAppointment: false,
             isExclusive: false,
             price: 28,
@@ -169,7 +172,7 @@ async function main() {
             email: 'emma.lefebvre@email.com',
             zipCode: '33000',
             city: 'Bordeaux',
-            attributes: {
+            attributes: JSON.stringify({
                 owner: true,
                 creditCount: 3,
                 monthlyPayments: 1200,
@@ -177,7 +180,7 @@ async function main() {
                 familySituation: 'Marié(e)',
                 situationPro: 'Salarié privé',
                 income: 3200,
-            },
+            }),
             isAppointment: false,
             isExclusive: true,
             price: 52,

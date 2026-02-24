@@ -194,7 +194,7 @@ model Notification {
   link      String?  // Optional link to related resource
 
   createdAt DateTime @default(now())
-  
+
   @@index([userId, read])
   @@index([createdAt])
 }
@@ -230,4 +230,10 @@ model ApiKey {
 
   @@index([userId])
   @@index([key])
+}
+
+enum Role {
+  BROKER
+  PROVIDER
+  ADMIN
 }
