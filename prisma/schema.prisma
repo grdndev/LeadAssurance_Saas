@@ -32,6 +32,7 @@ model User {
   transactions  Transaction[]
   notifications Notification[]
   apiKeys       ApiKey[]
+  disputes      Dispute[]
 
   // NextAuth
   emailVerified DateTime?
@@ -159,6 +160,7 @@ model Dispute {
   leadId      String
   lead        Lead     @relation(fields: [leadId], references: [id])
   brokerId    String
+  broker      User     @relation(fields: [brokerId], references: [id])
   reason      String
   description String?
   status      String   @default("OPEN") // OPEN, RESOLVED_REFUNDED, RESOLVED_REJECTED
