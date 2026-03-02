@@ -165,7 +165,7 @@ export const PRODUCTS: ProductDefinition[] = [
     ]
   },
   {
-    id: "ASSURANCE_MRH",
+    id: "ASSURANCE_HABITATION",
     name: "Assurance Habitation (MRH)",
     icon: Home,
     category: "Assurance",

@@ -105,6 +105,10 @@ export default function DashboardLayout({
     );
   }
 
+  const adminNavigation = [
+    {name: "Administration", href: "/dashboard", icon: LayoutDashboard },
+  ];
+
   const brokerNavigation = [
     { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
     { name: "Salle de Marché", href: "/dashboard/marketplace", icon: ShoppingCart },

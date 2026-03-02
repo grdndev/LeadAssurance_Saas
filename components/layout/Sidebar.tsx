@@ -28,6 +28,10 @@ export function Sidebar({ className }: SidebarProps) {
   const userRole = (session?.user as any)?.role;
   const isProvider = pathname?.includes("/provider");
 
+  const adminNavigation = [
+    {name: "Administration", href: "/dashboard", icon: LayoutDashboard },
+  ];
+
   const brokerNavigation = [
     { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
     { name: "Salle de Marché", href: "/dashboard/marketplace", icon: ShoppingCart },
@@ -37,20 +41,21 @@ export function Sidebar({ className }: SidebarProps) {
   ];
 
   const providerNavigation = [
-    { name: "Tableau de bord", href: "/dashboard/provider", icon: LayoutDashboard },
+    { name: "Tableau de bbbb", href: "/dashboard/provider", icon: LayoutDashboard },
     { name: "Envoyer un Lead", href: "/dashboard/provider/submit", icon: Upload },
     { name: "Mes Leads", href: "/dashboard/provider/leads", icon: FileText },
     { name: "Statistiques", href: "/dashboard/provider/stats", icon: BarChart3 },
     { name: "Clés API", href: "/dashboard/provider/apikeys", icon: Key },
   ];
 
-  const navigation = isProvider ? providerNavigation : brokerNavigation;
+  const navigation = userRole === "ADMIN" ? adminNavigation : isProvider ? providerNavigation : brokerNavigation;
 
   return (
     <div className={cn("pb-12 min-h-screen border-r bg-muted/40", className)}>
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            { (session?.user as any).role ?? "ok" }
             {isProvider ? "Espace Apporteur" : "Espace Courtier"}
           </h2>
           <div className="space-y-1">

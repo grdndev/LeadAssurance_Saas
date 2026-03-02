@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { notifyLeadApproved, notifyLeadRejected } from "@/lib/notifications";
-import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(request: Request) {
     try {
@@ -15,20 +13,37 @@ export async function GET(request: Request) {
 
         const { searchParams } = new URL(request.url);
         const status = searchParams.get("status") || "PENDING_APPROVAL";
+        const all = searchParams.get("all") ?? false;
+        var leads = [];
 
-        const leads = await prisma.lead.findMany({
-            where: { status },
-            include: {
-                provider: {
-                    select: {
-                        name: true,
-                        email: true
-                    }
+        if (all) {
+            leads = await prisma.lead.findMany({
+                include: {
+                    provider: {
+                        select: {
+                            name: true,
+                            email: true
+                        }
+                    },
+                    consent: true
                 },
-                consent: true
-            },
-            orderBy: { createdAt: "desc" }
-        });
+                orderBy: { createdAt: "desc" }
+            });
+        } else {
+            leads = await prisma.lead.findMany({
+                where: { status },
+                include: {
+                    provider: {
+                        select: {
+                            name: true,
+                            email: true
+                        }
+                    },
+                    consent: true
+                },
+                orderBy: { createdAt: "desc" }
+            });
+        }
 
         return NextResponse.json({ leads });
     } catch (error) {
@@ -37,7 +52,7 @@ export async function GET(request: Request) {
     }
 }
 
-export async function PATCH(request: Request) {
+export async function DELETE(req: Request) {
     try {
         const session = await getServerSession(authOptions);
 
@@ -45,39 +60,29 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { leadId, status, rejectionReason } = await request.json();
+        const { leadId } = await req.json();
+        if (!leadId) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 
-        if (!leadId || !["STOCK", "REJECTED"].includes(status)) {
-            return NextResponse.json({ error: "Données invalides" }, { status: 400 });
-        }
-
-        const updatedLead = await prisma.lead.update({
+        const lead = await prisma.lead.findFirst({
             where: { id: leadId },
-            data: {
-                status,
-                rejectionReason: status === "REJECTED" ? (rejectionReason || "Non conforme") : null,
-            }
+            include: { consent: true }
         });
 
-        // Notify the provider of the decision
-        if (status === "STOCK") {
-            await notifyLeadApproved(updatedLead.providerId, updatedLead.id, updatedLead.productType);
-        } else if (status === "REJECTED") {
-            await notifyLeadRejected(updatedLead.providerId, updatedLead.id, updatedLead.productType, rejectionReason);
+        if (!lead) return NextResponse.json({ error: "Lead introuvable" }, { status: 404 });
+
+        if (lead.consent) {
+            await prisma.consent.delete({
+                where: { id: lead.consent.id, leadId: lead.id }
+            })
         }
 
-        // Audit log
-        await writeAuditLog({
-            userId: (session.user as any).id,
-            action: status === "STOCK" ? "LEAD_APPROVED" : "LEAD_REJECTED",
-            entityType: "Lead",
-            entityId: updatedLead.id,
-            details: { status, rejectionReason: rejectionReason || null },
+        await prisma.lead.delete({
+            where: { id: leadId }
         });
 
-        return NextResponse.json({ success: true, lead: updatedLead });
+        return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Admin lead update error:", error);
+        console.error("Lead Delete error:", error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }

@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { userId } = await req.json();
+        const userId = await req.nextUrl.searchParams.get('userId') ?? null;
 
         if (userId) {
             const user = await prisma.user.findUnique({
@@ -56,7 +56,6 @@ export async function PATCH(req: Request) {
     }
 }
 
-// DELETE /api/user/provider/apikeys — revoke a key by id
 export async function DELETE(req: Request) {
     try {
         const session = await getServerSession(authOptions);

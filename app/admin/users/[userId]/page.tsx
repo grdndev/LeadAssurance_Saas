@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
     User,
@@ -13,9 +14,10 @@ import {
     Save,
     CheckCircle2,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    ArrowLeft
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 export default function UserPage({ params }: { params: Promise<{ userId: string }> }) {
     const { userId } = use(params);
     const { data: session } = useSession();
+    const router = useRouter();
     const [saved, setSaved] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -48,17 +51,18 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 const res = await fetch(`/api/admin/users?userId=${userId}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setProfile(data);
-                    const nameParts = (data.name || "").split(" ");
+                    setProfile(data.user);
+                    const nameParts = (data.user.name || "").split(" ");
+                    console.log(nameParts)
                     setFormData({
                         firstName: nameParts[0] || "",
                         lastName: nameParts.slice(1).join(" ") || "",
-                        email: data.email || "",
-                        phone: data.phone || "",
-                        companyName: data.companyName || "",
-                        siret: data.siret || "",
-                        orias: data.orias || "",
-                        address: data.address || "",
+                        email: data.user.email || "",
+                        phone: data.user.phone || "",
+                        companyName: data.user.companyName || "",
+                        siret: data.user.siret || "",
+                        orias: data.user.orias || "",
+                        address: data.user.address || "",
                     });
                 }
             } catch (err) {
@@ -82,6 +86,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    userId,
                     name: `${formData.firstName} ${formData.lastName}`.trim(),
                     phone: formData.phone,
                     companyName: formData.companyName,
@@ -120,6 +125,10 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
+            <Button variant="ghost" className="p-0" onClick={() => router.push('/admin/backoffice')}>
+                <ArrowLeft className="h-5 w-5" />
+            </Button>
+
             {/* Profile Section */}
             <Card className="border-border/50 bg-background/50">
                 <CardHeader>
