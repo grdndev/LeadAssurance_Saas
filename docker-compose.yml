@@ -1,0 +1,23 @@
+
+services:
+  frontend:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "postgres"
+    env_file: .env.docker
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: lead_assurances
+      POSTGRES_PASSWORD: lead_assurances_password
+      POSTGRES_DB: lead_assurances_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
