@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
                         email: row.email,
                         zipCode: row.zipCode,
                         city: row.city,
-                        attributes,
+                        attributes: JSON.stringify(attributes),
                         isAppointment: row.isAppointment === "true" || row.isAppointment === "1",
                         isExclusive: true,
                         price: parseFloat(row.price) || 50,

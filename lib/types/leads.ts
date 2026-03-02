@@ -31,6 +31,7 @@ export interface CreateLeadInput {
     isAppointment: boolean;
     price: number;
     consent: {
+        consentVersion: string;
         consentText: string;
         ipAddress: string;
         userAgent: string;
@@ -63,7 +64,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         phone: "0601020304",
         zipCode: "75001",
         city: "Paris",
-        attributes: { projectType: "Résidence principale", amount: 350000, income: 4500 },
+        attributes: JSON.stringify({ projectType: "Résidence principale", amount: 350000, income: 4500 }),
         isAppointment: false,
         isExclusive: true,
         price: 45,
@@ -72,6 +73,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
         updatedAt: new Date(),
         consent: {
+            consentVersion: "",
             id: "consent-1",
             leadId: "lead-1",
             consentText: "J'accepte d'être contacté par un courtier partenaire pour mon projet de crédit immobilier.",
@@ -80,7 +82,16 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
             urlSource: "https://comparateur-credit.fr/credit-immobilier",
             timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
             proofHash: "sha256:abc123def456..."
-        }
+        },
+        leadType: "LEAD",
+        appointmentChannel: null,
+        appointmentDate: null,
+        appointmentStatus: null,
+        availabilities: null,
+        brokerStatus: null,
+        confirmationSentAt: null,
+        lossReason: null,
+        rejectionReason: null
     },
     {
         id: "lead-2",
@@ -92,7 +103,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         phone: "0612345678",
         zipCode: "69002",
         city: "Lyon",
-        attributes: { requestType: "Changement", loanAmount: 200000, age: 34, smoker: false },
+        attributes: JSON.stringify({ requestType: "Changement", loanAmount: 200000, age: 34, smoker: false }),
         isAppointment: true,
         isExclusive: true,
         price: 55,
@@ -101,6 +112,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         createdAt: new Date(Date.now() - 10 * 60 * 1000),
         updatedAt: new Date(),
         consent: {
+            consentVersion: "",
             id: "consent-2",
             leadId: "lead-2",
             consentText: "J'accepte d'être recontacté pour un rendez-vous concernant mon assurance emprunteur.",
@@ -109,7 +121,16 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
             urlSource: "https://assurance-pret.fr/changement",
             timestamp: new Date(Date.now() - 10 * 60 * 1000),
             proofHash: "sha256:def789ghi012..."
-        }
+        },
+        leadType: "LEAD",
+        appointmentChannel: null,
+        appointmentDate: null,
+        appointmentStatus: null,
+        availabilities: null,
+        brokerStatus: null,
+        confirmationSentAt: null,
+        lossReason: null,
+        rejectionReason: null
     },
     {
         id: "lead-3",
@@ -121,7 +142,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         phone: "0698765432",
         zipCode: "13008",
         city: "Marseille",
-        attributes: { peopleCount: 2, age: 45, regime: "Salarié", priority: "Dentaire" },
+        attributes: JSON.stringify({ peopleCount: 2, age: 45, regime: "Salarié", priority: "Dentaire" }),
         isAppointment: false,
         isExclusive: true,
         price: 28,
@@ -130,6 +151,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
         updatedAt: new Date(),
         consent: {
+            consentVersion: "",
             id: "consent-3",
             leadId: "lead-3",
             consentText: "J'accepte d'être contacté pour recevoir des devis de mutuelle santé.",
@@ -138,7 +160,16 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
             urlSource: "https://mutuelle-comparateur.fr/sante",
             timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
             proofHash: "sha256:ghi345jkl678..."
-        }
+        },
+        leadType: "LEAD",
+        appointmentChannel: null,
+        appointmentDate: null,
+        appointmentStatus: null,
+        availabilities: null,
+        brokerStatus: null,
+        confirmationSentAt: null,
+        lossReason: null,
+        rejectionReason: null
     },
     {
         id: "lead-4",
@@ -150,7 +181,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         phone: "0687654321",
         zipCode: "33000",
         city: "Bordeaux",
-        attributes: { owner: true, creditCount: 3, monthlyPayments: 1200, totalDebt: 75000, familySituation: "Marié(e)", income: 3200 },
+        attributes: JSON.stringify({ owner: true, creditCount: 3, monthlyPayments: 1200, totalDebt: 75000, familySituation: "Marié(e)", income: 3200 }),
         isAppointment: false,
         isExclusive: true,
         price: 52,
@@ -159,6 +190,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
         updatedAt: new Date(),
         consent: {
+            consentVersion: "",
             id: "consent-4",
             leadId: "lead-4",
             consentText: "J'accepte d'être contacté concernant ma demande de rachat de crédits.",
@@ -167,7 +199,16 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
             urlSource: "https://rachat-credit-online.fr",
             timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
             proofHash: "sha256:jkl901mno234..."
-        }
+        },
+        leadType: "LEAD",
+        appointmentChannel: null,
+        appointmentDate: null,
+        appointmentStatus: null,
+        availabilities: null,
+        brokerStatus: null,
+        confirmationSentAt: null,
+        lossReason: null,
+        rejectionReason: null
     },
     {
         id: "lead-5",
@@ -179,7 +220,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         phone: "0654321098",
         zipCode: "31000",
         city: "Toulouse",
-        attributes: { objective: "Réduire impôts", taxAmount: "10 000 - 20 000€", investmentCapacity: "500 - 1000€/mois", horizon: "Long terme" },
+        attributes: JSON.stringify({ objective: "Réduire impôts", taxAmount: "10 000 - 20 000€", investmentCapacity: "500 - 1000€/mois", horizon: "Long terme" }),
         isAppointment: true,
         isExclusive: true,
         price: 85,
@@ -188,6 +229,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         createdAt: new Date(Date.now() - 30 * 60 * 1000),
         updatedAt: new Date(),
         consent: {
+            consentVersion: "",
             id: "consent-5",
             leadId: "lead-5",
             consentText: "J'accepte d'être recontacté par un conseiller en gestion de patrimoine pour un rendez-vous.",
@@ -196,7 +238,16 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
             urlSource: "https://defiscalisation-patrimoine.fr/contact",
             timestamp: new Date(Date.now() - 30 * 60 * 1000),
             proofHash: "sha256:mno567pqr890..."
-        }
+        },
+        leadType: "LEAD",
+        appointmentChannel: null,
+        appointmentDate: null,
+        appointmentStatus: null,
+        availabilities: null,
+        brokerStatus: null,
+        confirmationSentAt: null,
+        lossReason: null,
+        rejectionReason: null
     },
     {
         id: "lead-6",
@@ -208,7 +259,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         phone: "0623456789",
         zipCode: "44000",
         city: "Nantes",
-        attributes: { objective: "Préparer retraite", amount: "50 000 - 150 000€", payment: "Mensuel", horizon: "8+ ans" },
+        attributes: JSON.stringify({ objective: "Préparer retraite", amount: "50 000 - 150 000€", payment: "Mensuel", horizon: "8+ ans" }),
         isAppointment: true,
         isExclusive: true,
         price: 72,
@@ -217,6 +268,7 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         createdAt: new Date(Date.now() - 45 * 60 * 1000),
         updatedAt: new Date(),
         consent: {
+            consentVersion: "",
             id: "consent-6",
             leadId: "lead-6",
             consentText: "J'accepte d'être contacté pour un rendez-vous concernant mon projet d'épargne retraite.",
@@ -225,7 +277,16 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
             urlSource: "https://epargne-retraite.fr/per",
             timestamp: new Date(Date.now() - 45 * 60 * 1000),
             proofHash: "sha256:pqr123stu456..."
-        }
+        },
+        leadType: "LEAD",
+        appointmentChannel: null,
+        appointmentDate: null,
+        appointmentStatus: null,
+        availabilities: null,
+        brokerStatus: null,
+        confirmationSentAt: null,
+        lossReason: null,
+        rejectionReason: null
     }
 ];
 

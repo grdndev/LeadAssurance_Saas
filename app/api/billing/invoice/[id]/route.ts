@@ -38,7 +38,7 @@ export async function GET(
             })
         );
 
-        return new NextResponse(buffer, {
+        return new NextResponse(new Uint8Array(buffer), {
             headers: {
                 "Content-Type": "application/pdf",
                 "Content-Disposition": `attachment; filename="Facture_${transactionId.substring(0, 8)}.pdf"`,

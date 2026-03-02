@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 export function Hero() {
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
-  const userRole = session?.user?.role;
+  const userRole = (session?.user as any)?.role;
 
   return (
     <div className="relative isolate overflow-hidden">

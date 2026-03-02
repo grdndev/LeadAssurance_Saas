@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font, DocumentProps } from '@react-pdf/renderer';
 
 // Create styles
 const styles = StyleSheet.create({
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     }
 });
 
-interface InvoiceProps {
+interface InvoiceProps extends DocumentProps {
     transaction: any;
     user: any;
 }

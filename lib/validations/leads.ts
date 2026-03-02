@@ -19,7 +19,7 @@ export const submitLeadSchema = leadBaseSchema.extend({
         "ASSURANCE_VIE",
         "ASSURANCE_ANIMAUX"
     ]),
-    attributes: z.record(z.any()).optional(),
+    attributes: z.record(z.any(),z.any()).optional(),
     isAppointment: z.boolean().default(false),
     isExclusive: z.boolean().default(true),
     price: z.number().positive("Le prix doit être positif").min(5, "Prix minimum: 5€"),

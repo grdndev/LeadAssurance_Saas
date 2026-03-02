@@ -13,7 +13,7 @@ export const transactionSchema = z.object({
     amount: z.number(),
     credits: z.number(),
     description: z.string().min(1, "Description requise"),
-    metadata: z.record(z.any()).optional(),
+    metadata: z.record(z.any(), z.any()).optional(),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

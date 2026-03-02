@@ -10,7 +10,7 @@ import { NotificationCenter } from "./NotificationCenter";
 export function Navbar() {
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
-  const userRole = session?.user?.role;
+  const userRole = (session?.user as any)?.role;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const getInitials = (name: string) => {

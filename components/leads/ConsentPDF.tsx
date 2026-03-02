@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, DocumentProps } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
     page: { padding: 40, fontSize: 10, fontFamily: 'Helvetica' },
@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     hash: { fontSize: 8, color: '#999', marginTop: 10, fontFamily: 'Courier' }
 });
 
-interface ConsentPDFProps {
+interface ConsentPDFProps extends DocumentProps {
     lead: any;
     consent: any;
 }
