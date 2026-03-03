@@ -1,8 +1,10 @@
 "use client";
 
+import { NotificationCenter } from "@/components/layout/NotificationCenter";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -20,9 +22,6 @@ import {
   Calendar,
   Key,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import { NotificationCenter } from "@/components/layout/NotificationCenter";
 
 // Routes that only BROKERs may access
 const BROKER_ONLY = ["/dashboard/leads", "/dashboard/appointments", "/dashboard/billing"];
@@ -36,12 +35,11 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
   const { data: session, status } = useSession();
-
+  const router = useRouter();
+  const pathname = usePathname();
   const userRole = (session?.user as any)?.role as string | undefined;
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   // Close sidebar on mobile when navigating
   useEffect(() => {
@@ -50,7 +48,9 @@ export default function DashboardLayout({
 
   // ── Role-based redirect ──────────────────────────────────────────────────────
   useEffect(() => {
-    if (status !== "authenticated" || !userRole) return;
+    if (pathname != "/dashboard/marketplace" && status !== "authenticated" && status !== "loading") {
+        router.push("/login");
+    }
 
     const isShared = SHARED.some((s) => pathname?.startsWith(s));
     if (isShared) return;
@@ -103,6 +103,8 @@ export default function DashboardLayout({
         <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </div>
     );
+  } else if (pathname != "/dashboard/marketplace" && status !== "authenticated") {
+      return null;
   }
 
   const adminNavigation = [
