@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, LogOut, Settings, LayoutDashboard, ShieldUser } from "lucide-react";
 
-
 // Routes that only BROKERs may access
 const BROKER_ONLY = ["/dashboard/leads", "/dashboard/appointments", "/dashboard/billing"];
 // Routes that only PROVIDERs may access

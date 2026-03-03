@@ -44,9 +44,20 @@ export async function PATCH(req: Request) {
 
         const { userId, ...updates } = await req.json();
 
+        const user = await prisma.user.findUnique({
+            where: {id: userId}
+        })
+
+        if (!user) {
+            return NextResponse.json({ error: "Utilisateur introuvable"}, { status: 400 });
+        }
+
         const updatedUser = await prisma.user.update({
             where: { id: userId },
-            data: updates
+            data: {
+                ...updates,
+                role: user.role
+            }
         });
 
         return NextResponse.json({ user: updatedUser });

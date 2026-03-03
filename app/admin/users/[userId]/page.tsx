@@ -53,7 +53,6 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                     const data = await res.json();
                     setProfile(data.user);
                     const nameParts = (data.user.name || "").split(" ");
-                    console.log(nameParts)
                     setFormData({
                         firstName: nameParts[0] || "",
                         lastName: nameParts.slice(1).join(" ") || "",
@@ -99,7 +98,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
             if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
 
             const updated = await res.json();
-            setProfile(updated);
+            setProfile(updated.user);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (err: any) {
@@ -109,9 +108,9 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
         }
     };
 
-    const userName = profile?.name || session?.user?.name || "";
-    const userEmail = profile?.email || session?.user?.email || "";
-    const userRole = profile?.role || (session?.user as any)?.role || "";
+    const userName = profile?.name || "";
+    const userEmail = profile?.email || "";
+    const userRole = profile?.role || "";
     const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "??";
     const roleLabel = userRole === "BROKER" ? "Courtier" : userRole === "PROVIDER" ? "Apporteur" : userRole === "ADMIN" ? "Administrateur" : userRole;
 
@@ -206,7 +205,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 </div>
             )}
             <div className="flex justify-end gap-4">
-                <Button variant="outline" className="rounded-full">Annuler</Button>
+                <Button variant="outline" className="rounded-full" onClick={() => router.push('/admin/backoffice')}>Annuler</Button>
                 <Button className="rounded-full px-8" onClick={handleSave} disabled={saving}>
                     {saving ? (
                         <>
