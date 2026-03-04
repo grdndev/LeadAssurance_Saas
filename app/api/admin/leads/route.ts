@@ -23,7 +23,8 @@ export async function GET(request: Request) {
                 include: {
                     provider: {
                         select: {
-                            name: true,
+                            firstname: true,
+                            lastname: true,
                             email: true
                         }
                     },
@@ -37,7 +38,8 @@ export async function GET(request: Request) {
                 include: {
                     provider: {
                         select: {
-                            name: true,
+                            firstname: true,
+                            lastname: true,
                             email: true
                         }
                     },

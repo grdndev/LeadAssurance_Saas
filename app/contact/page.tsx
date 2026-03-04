@@ -11,7 +11,8 @@ import { toast } from "sonner";
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    firstname: "",
+    lastname: "",
     email: "",
     subject: "",
     message: "",
@@ -23,9 +24,9 @@ export default function ContactPage() {
 
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     toast.success("Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setFormData({ firstname: "", lastname: "", email: "", subject: "", message: "" });
     setLoading(false);
   };
 
@@ -112,12 +113,23 @@ export default function ContactPage() {
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Nom complet</Label>
+                        <Label htmlFor="firstname">Prénom</Label>
                         <Input
-                          id="name"
-                          name="name"
+                          id="firstname"
+                          name="firstname"
+                          placeholder="Jean"
+                          value={formData.firstname}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastname">Nom</Label>
+                        <Input
+                          id="lastname"
+                          name="lastname"
                           placeholder="Jean Dupont"
-                          value={formData.name}
+                          value={formData.lastname}
                           onChange={handleChange}
                           required
                         />
@@ -162,9 +174,9 @@ export default function ContactPage() {
                       />
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full rounded-full py-6" 
+                    <Button
+                      type="submit"
+                      className="w-full rounded-full py-6"
                       disabled={loading}
                     >
                       <Send className="h-4 w-4 mr-2" />

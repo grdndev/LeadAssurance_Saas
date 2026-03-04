@@ -62,7 +62,7 @@ export async function PATCH(
 
         if (broker) {
             const template = emailTemplates.appointmentStatusChanged(
-                broker.name || broker.email,
+                `${broker.firstname || ""} ${broker.lastname || ""}` || broker.email,
                 appointmentStatus,
                 product?.name || lead.productType
             );

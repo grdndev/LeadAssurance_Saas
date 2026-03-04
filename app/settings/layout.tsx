@@ -11,12 +11,18 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
     const router = useRouter();
 
     useEffect(() => {
-        if ((status ?? null) !== "authenticated") {
+        if (status !== "authenticated" && status !== "loading") {
             router.push("/login");
         }
     }, []);
 
-    if ((status ?? null) !== "authenticated") {
+    if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-secondary/30 flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+    } if (status !== "authenticated") {
         return null;
     }
 

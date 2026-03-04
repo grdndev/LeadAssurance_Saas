@@ -13,7 +13,7 @@ async function main() {
         update: {},
         create: {
             email: 'admin@leadsassurance.com',
-            name: 'Administrateur',
+            firstname: 'Administrateur',
 	    password: adminPassword,
             role: Role.ADMIN,
             credits: 0,
@@ -28,7 +28,8 @@ async function main() {
         update: {},
         create: {
             email: 'courtier@test.com',
-            name: 'Jean Courtier',
+            firstname: 'Jean',
+            lastname: 'Courtier',
 	    password: brokerPassword,
             role: Role.BROKER,
             credits: 500, // 500€ de crédits pour tester
@@ -43,7 +44,8 @@ async function main() {
         update: {},
         create: {
             email: 'apporteur@test.com',
-            name: 'Marie Apporteur',
+            firstname: 'Marie',
+            lastname: 'Apporteur',
 	    password: providerPassword,
             role: Role.PROVIDER,
             credits: 0,

@@ -149,12 +149,12 @@ export async function POST(req: Request) {
         if (isRdv) {
             sendEmail({
                 to: result.provider.email,
-                ...templates.appointmentSold(result.provider.name || "Apporteur", result.lead.productType, result.lead.price)
+                ...templates.appointmentSold(`${result.provider.firstname || ""} ${result.provider.lastname || ""}` || "Apporteur", result.lead.productType, result.lead.price)
             });
         } else {
             sendEmail({
                 to: result.provider.email,
-                ...templates.leadSale(result.provider.name || "Apporteur", result.lead.productType, result.lead.price)
+                ...templates.leadSale(`${result.provider.firstname || ""} ${result.provider.lastname || ""}` || "Apporteur", result.lead.productType, result.lead.price)
             });
         }
 

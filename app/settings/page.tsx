@@ -28,16 +28,7 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
 
     // Form state
-    const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        companyName: "",
-        siret: "",
-        orias: "",
-        address: "",
-    });
+    const [formData, setFormData] = useState<Record<string, string | undefined>>({});
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -46,21 +37,23 @@ export default function SettingsPage() {
                 if (res.ok) {
                     const data = await res.json();
                     setProfile(data);
-                    const nameParts = (data.name || "").split(" ");
                     setFormData({
-                        firstName: nameParts[0] || "",
-                        lastName: nameParts.slice(1).join(" ") || "",
-                        email: data.email || "",
-                        phone: data.phone || "",
-                        companyName: data.companyName || "",
-                        siret: data.siret || "",
-                        orias: data.orias || "",
-                        address: data.address || "",
+                        firstname: data.firstname || undefined,
+                        lastname: data.lastname || undefined,
+                        email: data.email || undefined,
+                        phone: data.phone || undefined,
+                        companyName: data.companyName || undefined,
+                        siret: data.siret || undefined,
+                        orias: data.orias || undefined,
+                        address: data.address || undefined,
+                        password: undefined,
+                        confirm: undefined
                     });
                 }
             } catch (err) {
                 console.error("Fetch profile error:", err);
             } finally {
+                console.log(profile)
                 setLoading(false);
             }
         };
@@ -68,7 +61,7 @@ export default function SettingsPage() {
     }, []);
 
     const handleChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => ({ ...prev, [field]: profile[field] == value && value == "" ? undefined : value }));
     };
 
     const handleSave = async () => {
@@ -78,30 +71,24 @@ export default function SettingsPage() {
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: `${formData.firstName} ${formData.lastName}`.trim(),
-                    phone: formData.phone,
-                    companyName: formData.companyName,
-                    siret: formData.siret,
-                    orias: formData.orias,
-                    address: formData.address,
-                }),
+                body: JSON.stringify(formData),
             });
 
-            if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
+            if (!res.ok) throw new Error(await res.json().then(j => j.error) || "Erreur lors de la sauvegarde");
 
             const updated = await res.json();
             setProfile(updated);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (err: any) {
+            console.log(err)
             setError(err.message || "Erreur lors de la sauvegarde");
         } finally {
             setSaving(false);
         }
     };
 
-    const userName = profile?.name || session?.user?.name || "";
+    const userName = profile ? `${profile.firstname} ${profile.lastname}` : session?.user?.name || "";
     const userEmail = profile?.email || session?.user?.email || "";
     const userRole = profile?.role || (session?.user as any)?.role || "";
     const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "??";
@@ -145,19 +132,19 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
                         <div className="space-y-2">
                             <Label>Prénom</Label>
-                            <Input value={formData.firstName} onChange={(e) => handleChange("firstName", e.target.value)} className="rounded-full" />
+                            <Input value={formData.firstname ?? ""} onChange={(e) => handleChange("firstname", e.target.value)} className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>Nom</Label>
-                            <Input value={formData.lastName} onChange={(e) => handleChange("lastName", e.target.value)} className="rounded-full" />
+                            <Input value={formData.lastname ?? ""} onChange={(e) => handleChange("lastname", e.target.value)} className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>Email</Label>
-                            <Input value={formData.email} type="email" className="rounded-full" disabled />
+                            <Input value={formData.email ?? ""} type="email" className="rounded-full" disabled />
                         </div>
                         <div className="space-y-2">
                             <Label>Téléphone</Label>
-                            <Input value={formData.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="06 12 34 56 78" className="rounded-full" />
+                            <Input value={formData.phone ?? ""} onChange={(e) => handleChange("phone", e.target.value)} placeholder="06 12 34 56 78" className="rounded-full" />
                         </div>
                     </div>
                 </CardContent>
@@ -175,19 +162,19 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Raison sociale</Label>
-                            <Input value={formData.companyName} onChange={(e) => handleChange("companyName", e.target.value)} placeholder="Ma Société SARL" className="rounded-full" />
+                            <Input value={formData.companyName ?? ""} onChange={(e) => handleChange("companyName", e.target.value)} placeholder="Ma Société SARL" className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>SIRET</Label>
-                            <Input value={formData.siret} onChange={(e) => handleChange("siret", e.target.value)} placeholder="123 456 789 00012" className="rounded-full" />
+                            <Input value={formData.siret ?? ""} onChange={(e) => handleChange("siret", e.target.value)} placeholder="123 456 789 00012" className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>Numéro ORIAS</Label>
-                            <Input value={formData.orias} onChange={(e) => handleChange("orias", e.target.value)} placeholder="12345678" className="rounded-full" />
+                            <Input value={formData.orias ?? ""} onChange={(e) => handleChange("orias", e.target.value)} placeholder="12345678" className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>Adresse</Label>
-                            <Input value={formData.address} onChange={(e) => handleChange("address", e.target.value)} placeholder="15 rue de la Paix, 75002 Paris" className="rounded-full" />
+                            <Input value={formData.address ?? ""} onChange={(e) => handleChange("address", e.target.value)} placeholder="15 rue de la Paix, 75002 Paris" className="rounded-full" />
                         </div>
                     </div>
                 </CardContent>
@@ -237,17 +224,12 @@ export default function SettingsPage() {
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label>Mot de passe actuel</Label>
-                            <Input type="password" placeholder="••••••••" className="rounded-full" />
-                        </div>
-                        <div></div>
-                        <div className="space-y-2">
                             <Label>Nouveau mot de passe</Label>
-                            <Input type="password" placeholder="••••••••" className="rounded-full" />
+                            <Input type="password" placeholder="••••••••" className="rounded-full"  value={formData.password ?? ""} onChange={(e) => handleChange("password", e.target.value)}/>
                         </div>
                         <div className="space-y-2">
                             <Label>Confirmer le mot de passe</Label>
-                            <Input type="password" placeholder="••••••••" className="rounded-full" />
+                            <Input type="password" placeholder="••••••••" className="rounded-full"  value={formData.confirm ?? ""} onChange={(e) => handleChange("confirm", e.target.value)}/>
                         </div>
                     </div>
 

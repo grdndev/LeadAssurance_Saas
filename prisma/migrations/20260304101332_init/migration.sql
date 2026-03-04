@@ -1,9 +1,13 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('BROKER', 'PROVIDER', 'ADMIN');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT,
-    "name" TEXT,
+    "firstname" TEXT,
+    "lastname" TEXT,
     "role" TEXT NOT NULL DEFAULT 'BROKER',
     "credits" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "phone" TEXT,
@@ -253,6 +257,9 @@ ALTER TABLE "MarketplaceReservation" ADD CONSTRAINT "MarketplaceReservation_brok
 
 -- AddForeignKey
 ALTER TABLE "Dispute" ADD CONSTRAINT "Dispute_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "Lead"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Dispute" ADD CONSTRAINT "Dispute_brokerId_fkey" FOREIGN KEY ("brokerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

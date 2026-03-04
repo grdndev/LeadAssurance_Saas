@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import z, { ZodError } from "zod";
 
 export async function GET(req: NextRequest) {
     try {
@@ -34,6 +35,16 @@ export async function GET(req: NextRequest) {
     }
 }
 
+const schema = z.object({
+    firstname: z.string().optional(),
+    lastname: z.string().optional(),
+    phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }).optional(),
+    companyName: z.string().optional(),
+    siret: z.string().regex(/(^$)|([\d\s]{14,})/, { error: "Veuillez entrer un numéro SIRET valide" }).optional(),
+    orias: z.string().regex(/(^$)|(\d+)/, { error: "Veuillez entrer un numéro ORIAS valide" }).optional(),
+    address: z.string().optional()
+})
+
 export async function PATCH(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -42,7 +53,8 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { userId, ...updates } = await req.json();
+        const { userId, ...data } = await req.json();
+        const updates = schema.parse(data);
 
         const user = await prisma.user.findUnique({
             where: {id: userId}
@@ -55,13 +67,16 @@ export async function PATCH(req: Request) {
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: {
-                ...updates,
-                role: user.role
+                ...updates
             }
         });
 
         return NextResponse.json({ user: updatedUser });
     } catch (error) {
+        if (error instanceof ZodError) {
+            return NextResponse.json({ error: error.issues.map(e => e.message).join(", ") }, { status: 500 });
+        }
+
         console.error("User update error:", error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }

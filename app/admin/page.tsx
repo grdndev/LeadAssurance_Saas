@@ -256,7 +256,7 @@ export default function AdminDashboard() {
                                                 <div>
                                                     <div className="font-medium">{lead.productType.replace(/_/g, " ")}</div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        Par {lead.provider.name} • {new Date(lead.createdAt).toLocaleString()}
+                                                        Par {lead.provider.firstname || ""} {lead.provider.lastname || ""} • {new Date(lead.createdAt).toLocaleString()}
                                                     </div>
                                                     <div className="flex gap-2 mt-1">
                                                         <Badge variant="outline" className="text-[10px]">{lead.zipCode} - {lead.city}</Badge>
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
                                                     {dispute.status}
                                                 </Badge>
                                             </div>
-                                            <p className="text-sm text-muted-foreground">Signalé par {dispute.broker.name} ({dispute.broker.email})</p>
+                                            <p className="text-sm text-muted-foreground">Signalé par {dispute.broker.firstname || ""} {dispute.broker.lastname || ""} ({dispute.broker.email})</p>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="p-3 rounded-lg bg-secondary/30 text-sm">

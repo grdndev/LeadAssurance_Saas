@@ -110,7 +110,7 @@ export const InvoicePDF: React.FC<InvoiceProps> = ({ transaction, user }) => (
 
             <View style={styles.customerInfo}>
                 <Text style={styles.sectionTitle}>Facturé à :</Text>
-                <Text style={{ fontSize: 13, fontWeight: 'bold' }}>{user.name}</Text>
+                <Text style={{ fontSize: 13, fontWeight: 'bold' }}>{user.firstname || ""} {user.lastname || ""}</Text>
                 <Text>{user.email}</Text>
                 {/* Add more user info if available like company, address */}
             </View>

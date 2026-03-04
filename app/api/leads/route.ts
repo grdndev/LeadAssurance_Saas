@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
                 include: {
                     consent: true,
                     provider: {
-                        select: { id: true, name: true, email: true }
+                        select: { id: true, firstname: true, lastname: true, email: true }
                     }
                 },
                 orderBy: { createdAt: "desc" }
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
                 include: {
                     consent: true,
                     broker: {
-                        select: { id: true, name: true, email: true }
+                        select: { id: true, firstname: true, lastname: true, email: true }
                     }
                 },
                 orderBy: { createdAt: "desc" }

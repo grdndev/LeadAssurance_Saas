@@ -3,8 +3,8 @@ import { Lead, Consent, User } from "@prisma/client";
 // Types for the application
 export type LeadWithRelations = Lead & {
     consent: Consent | null;
-    provider: Pick<User, "id" | "name" | "email">;
-    broker?: Pick<User, "id" | "name" | "email"> | null;
+    provider: Pick<User, "id" | "firstname" | "lastname" | "email">;
+    broker?: Pick<User, "id" | "firstname" | "lastname" | "email"> | null;
 };
 
 export type LeadStatus = "STOCK" | "RESERVED" | "SOLD" | "REJECTED";

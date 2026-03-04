@@ -22,7 +22,7 @@ export async function GET(
             include: {
                 consent: true,
                 provider: {
-                    select: { id: true, name: true, email: true, companyName: true },
+                    select: { id: true, firstname: true, lastname: true, email: true, companyName: true },
                 },
             },
         });

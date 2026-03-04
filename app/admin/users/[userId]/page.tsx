@@ -25,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 
 export default function UserPage({ params }: { params: Promise<{ userId: string }> }) {
     const { userId } = use(params);
-    const { data: session } = useSession();
     const router = useRouter();
     const [saved, setSaved] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -35,8 +34,8 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
 
     // Form state
     const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
+        firstname: "",
+        lastname: "",
         email: "",
         phone: "",
         companyName: "",
@@ -52,10 +51,9 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 if (res.ok) {
                     const data = await res.json();
                     setProfile(data.user);
-                    const nameParts = (data.user.name || "").split(" ");
                     setFormData({
-                        firstName: nameParts[0] || "",
-                        lastName: nameParts.slice(1).join(" ") || "",
+                        firstname: data.user.firstname || "",
+                        lastname: data.user.lastname || "",
                         email: data.user.email || "",
                         phone: data.user.phone || "",
                         companyName: data.user.companyName || "",
@@ -74,7 +72,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
     }, []);
 
     const handleChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => ({ ...prev, [field]: profile[field] == value && value == "" ? undefined : value }));
     };
 
     const handleSave = async () => {
@@ -86,7 +84,8 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     userId,
-                    name: `${formData.firstName} ${formData.lastName}`.trim(),
+                    firstname: formData.firstname,
+                    lastname: formData.lastname,
                     phone: formData.phone,
                     companyName: formData.companyName,
                     siret: formData.siret,
@@ -95,7 +94,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 }),
             });
 
-            if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
+            if (!res.ok) throw new Error(await res.json().then(j => j.error) || "Erreur lors de la sauvegarde");
 
             const updated = await res.json();
             setProfile(updated.user);
@@ -108,7 +107,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
         }
     };
 
-    const userName = profile?.name || "";
+    const userName = profile ? `${profile.firstname} ${profile.lastname}` : "";
     const userEmail = profile?.email || "";
     const userRole = profile?.role || "";
     const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "??";
@@ -150,11 +149,11 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
                         <div className="space-y-2">
                             <Label>Prénom</Label>
-                            <Input value={formData.firstName} onChange={(e) => handleChange("firstName", e.target.value)} className="rounded-full" />
+                            <Input value={formData.firstname} onChange={(e) => handleChange("firstname", e.target.value)} className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>Nom</Label>
-                            <Input value={formData.lastName} onChange={(e) => handleChange("lastName", e.target.value)} className="rounded-full" />
+                            <Input value={formData.lastname} onChange={(e) => handleChange("lastname", e.target.value)} className="rounded-full" />
                         </div>
                         <div className="space-y-2">
                             <Label>Email</Label>

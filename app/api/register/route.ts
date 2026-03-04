@@ -5,7 +5,7 @@ import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
     try {
-        const { email, password, name, role } = await req.json();
+        const { email, password, firstname, lastname, role } = await req.json();
 
         if (!email || !password || !role) {
             return NextResponse.json(
@@ -31,7 +31,8 @@ export async function POST(req: Request) {
             data: {
                 email,
                 password: hashedPassword,
-                name,
+                firstname,
+                lastname,
                 role: role.toUpperCase(), // "BROKER" or "PROVIDER"
                 credits: role.toUpperCase() === "BROKER" ? 0 : 0,
             },

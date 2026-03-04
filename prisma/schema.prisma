@@ -14,7 +14,8 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   password      String?
-  name          String?
+  firstname     String?
+  lastname      String?
   role          String    @default("BROKER") // BROKER, PROVIDER, ADMIN
   credits       Float     @default(0)
 

@@ -17,7 +17,8 @@ export async function GET() {
                 lead: true,
                 broker: {
                     select: {
-                        name: true,
+                        firstname: true,
+                        lastname: true,
                         email: true
                     }
                 }
