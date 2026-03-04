@@ -64,6 +64,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
                 }
             } catch (err) {
                 console.error("Fetch profile error:", err);
+                router.push("/admin/backoffice")
             } finally {
                 setLoading(false);
             }
