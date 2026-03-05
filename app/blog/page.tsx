@@ -6,61 +6,38 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Clock, User, ArrowRight } from "lucide-react";
-
-const ARTICLES = [
-    {
-        id: "importance-dressage-chien",
-        title: "L'importance du dressage pour la sécurité de votre chien",
-        excerpt: "Découvrez pourquoi une formation canine adéquate est essentielle non seulement pour l'obéissance, mais aussi pour la prévention des accidents.",
-        date: "05 Février 2024",
-        author: "Expert Canin",
-        category: "Formation Canine",
-        readTime: "5 min",
-        image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: "methodes-dressage-chien",
-        title: "Méthodes de Dressage Canin : Éducation Positive ou Traditionnelle ?",
-        excerpt: "Comparatif détaillé des principales approches d'éducation canine. Trouvez la méthode adaptée à votre chien et ses besoins spécifiques.",
-        date: "09 Février 2024",
-        author: "Comportementaliste",
-        category: "Formation Canine",
-        readTime: "7 min",
-        image: "https://images.unsplash.com/photo-1534361960057-19889db9621e?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: "education-chiot-premiers-mois",
-        title: "Éduquer un Chiot : Le Guide Complet des Premiers Mois",
-        excerpt: "Socialisation, propreté, ordres de base : tout ce qu'il faut savoir pour éduquer votre chiot de 2 à 6 mois avec bienveillance et efficacité.",
-        date: "09 Février 2024",
-        author: "Éducateur Canin Certifié",
-        category: "Formation Canine",
-        readTime: "10 min",
-        image: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: "devenir-educateur-canin-professionnel",
-        title: "Comment Devenir Éducateur Canin Professionnel en France",
-        excerpt: "Diplômes, formations, démarches administratives et business model pour transformer votre passion en métier reconnu. Guide complet 2024.",
-        date: "09 Février 2024",
-        author: "Consultant Formation Pro",
-        category: "Carrière & Formation",
-        readTime: "12 min",
-        image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: "assurance-animaux-comment-choisir",
-        title: "Assurance Chien & Chat : Comment Bien Choisir ?",
-        excerpt: "Couvertures, tarifs, exclusions : tout savoir pour choisir la meilleure assurance santé pour votre animal de compagnie.",
-        date: "10 Février 2024",
-        author: "Conseiller Assurances",
-        category: "Assurance Animaux",
-        readTime: "8 min",
-        image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=2069&auto=format&fit=crop"
-    }
-];
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function BlogPage() {
+    const [articles, setArticles] = useState<any[]>([]);
+
+    const fetchData = async () => {
+        try {
+            const res = await fetch("/api/blog");
+
+            if (res.ok) {
+                const json = await res.json();
+                const articles = json.articles;
+                for(let art of articles) {
+                    if (art.image) {
+                        art.image = art.image.startsWith("data:") ? art.image : `data:image/*;base64,${art.image}`;
+                    }
+                }
+
+                setArticles(articles);
+            } else {
+                throw new Error("Erreur serveur");
+            }
+        } catch (error) {
+            toast.error("Erreur lors du chargement des données");
+        }
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     return (
         <div className="min-h-screen bg-secondary/10">
             {/* Header */}
@@ -76,10 +53,6 @@ export default function BlogPage() {
                             <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-6">
                                 Conseils & Expertise
                             </h1>
-                            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                                Découvrez nos guides sur l'éducation canine, l'assurance animaux et les meilleures pratiques
-                                pour le bien-être de vos compagnons.
-                            </p>
                         </motion.div>
                     </div>
                 </div>
@@ -88,35 +61,33 @@ export default function BlogPage() {
             {/* Articles Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {ARTICLES.map((article, idx) => (
+                    {articles.map((article, idx) => (
                         <motion.div
                             key={article.id}
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1, duration: 0.5 }}
                         >
-                            <Link href={`/blog/${article.id}`}>
+                            <Link href={`/blog/${article.slug}`}>
                                 <Card className="h-full border-border/50 bg-background overflow-hidden hover:shadow-2xl hover:border-primary/50 transition-all duration-300 group cursor-pointer">
                                     {/* Image */}
                                     <div className="aspect-video relative overflow-hidden bg-secondary">
+                                        {article.image &&
                                         <img
                                             src={article.image}
                                             alt={article.title}
                                             className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
-                                        />
-                                        <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground border-none shadow-lg">
-                                            {article.category}
-                                        </Badge>
+                                        />}
                                     </div>
 
                                     {/* Content */}
                                     <CardHeader className="pb-4">
                                         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-3">
                                             <span className="flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> {article.readTime}
+                                                <Clock className="h-3 w-3" /> {Math.floor(article.duration / 60)} minutes
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <User className="h-3 w-3" /> {article.author}
+                                                <User className="h-3 w-3" /> {article.author.firstname ?? ""} {article.author.lastname ?? ""}
                                             </span>
                                         </div>
                                         <CardTitle className="leading-tight text-xl group-hover:text-primary transition-colors line-clamp-2">
@@ -132,7 +103,7 @@ export default function BlogPage() {
                                             Lire l'article <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-4 pt-4 border-t border-border/50">
-                                            Publié le {article.date}
+                                            Publié le {article.publishedAt}
                                         </div>
                                     </CardContent>
                                 </Card>

@@ -201,12 +201,69 @@ async function main() {
     });
     console.log('✅ Lead vendu créé:', soldLead.id, '- Acheté par:', broker.email);
 
+    // Seed some blog articles using the administrator as author
+    const blogArticles = [
+        {
+            title: "L'importance du dressage pour la sécurité de votre chien",
+            content: "Le dressage ne se résume pas à apprendre à votre chien à faire le \"beau\" ou à donner la patte. C'est un outil fondamental pour assurer sa sécurité et celle des autres."
+        },
+        {
+            title: "Méthodes de Dressage Canin : Éducation Positive ou Traditionnelle ?",
+            content: "Il existe plusieurs méthodes de dressage, chacune avec ses avantages et ses inconvénients. Ce dossier compare l'approche positive à la méthode traditionnelle pour vous aider à choisir."
+        },
+        {
+            title: "Éduquer un Chiot : Le Guide Complet des Premiers Mois",
+            content: "Les premiers mois de votre chiot sont déterminants. Apprenez les bases de la socialisation, du rappel et de la propreté dans ce guide pratique."
+        },
+        {
+            title: "Comment Devenir Éducateur Canin Professionnel en France",
+            content: "Vous souhaitez transformer votre passion pour les chiens en métier ? Suivez nos conseils pour obtenir les formations nécessaires et démarrer en tant qu'éducateur canin."
+        },
+        {
+            title: "Assurance Chien & Chat : Comment Bien Choisir ?",
+            content: "Comparer les garanties, comprendre les exclusions et trouver le bon contrat pour votre compagnon : tout ce qu'il faut savoir pour bien choisir une assurance animaux."
+        },
+    ];
+
+    for (const art of blogArticles) {
+        let slug = art.title
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .split(' ')
+            .slice(0, 5)
+            .join('-');
+        const exists = await prisma.article.count({ where: { slug } });
+        if (exists > 0) {
+            slug += `-${exists + 1}`;
+        }
+        const excerpt = art.content.length > 100 ? `${art.content.substring(0, 100)}...` : art.content;
+        const duration = Math.ceil(art.content.length / 1000);
+
+        const createdArticle = await prisma.article.upsert({
+            where: { slug },
+            update: {},
+            create: {
+                slug,
+                title: art.title,
+                content: art.content,
+                excerpt,
+                duration,
+                userId: admin.id,
+                published: true,
+                publishedAt: new Date(),
+            },
+        });
+        console.log('✅ Article créé:', createdArticle.slug);
+    }
+
     console.log('\n🎉 Seeding terminé avec succès!\n');
     console.log('📝 Comptes de test créés:');
     console.log('   Admin:     admin@leadsassurance.com / admin123');
     console.log('   Courtier:  courtier@test.com / broker123 (500€ crédits)');
     console.log('   Apporteur: apporteur@test.com / provider123\n');
     console.log('💡 Accédez à Prisma Studio: npx prisma studio');
+
+
 }
 
 main()

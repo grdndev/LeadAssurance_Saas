@@ -34,6 +34,7 @@ model User {
   notifications Notification[]
   apiKeys       ApiKey[]
   disputes      Dispute[]
+  articles      Article[]
 
   // NextAuth
   emailVerified DateTime?
@@ -233,6 +234,20 @@ model ApiKey {
 
   @@index([userId])
   @@index([key])
+}
+
+model Article {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  image       Bytes?
+  content     String
+  excerpt     String?
+  duration    Int
+  userId      String
+  author      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  published   Boolean   @default(false)
+  publishedAt DateTime?
 }
 
 enum Role {

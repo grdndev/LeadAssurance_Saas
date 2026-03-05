@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, LogOut, Settings, LayoutDashboard, ShieldUser } from "lucide-react";
+import { Menu, X, LogOut, Settings, LayoutDashboard, ShieldUser, PenLine } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -38,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navigation = [
     {name: "Administration", href: "/admin", icon: LayoutDashboard },
     {name: "Backoffice", href: "/admin/backoffice", icon: ShieldUser },
+    {name: "Blog", href: "/admin/blog", icon: PenLine },
   ];
 
   const getInitials = (name: string) => {
