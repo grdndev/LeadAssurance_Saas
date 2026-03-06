@@ -9,6 +9,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, Loader2, Users, Upload, AlertCircle, Eye, EyeOff } from "lucide-react";
+import z, { ZodError } from "zod";
+
+const schema = z.object({
+  firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+  lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+  email: z.email(),
+  password: z.string()
+  .min(8, "Le mot de passe doit faire au moins 8 caractères")
+  .regex(/[A-Z]/, "1 majuscule requise")
+  .regex(/[a-z]/, "1 minuscule requise")
+  .regex(/[0-9]/, "1 chiffre requis")
+  .regex(/[^A-Za-z0-9]/, "1 caractère spécial requis")
+})
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,8 +29,8 @@ export default function RegisterPage() {
   const [role, setRole] = useState<"BROKER" | "PROVIDER">("BROKER");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
     email: "",
     password: "",
   });
@@ -29,12 +42,13 @@ export default function RegisterPage() {
     setError(null);
 
     try {
+      schema.parse(formData);
+
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          name: `${formData.firstName} ${formData.lastName}`,
           role,
         }),
       });
@@ -67,7 +81,11 @@ export default function RegisterPage() {
         router.refresh();
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err instanceof ZodError) {
+          setError(err.issues.map(e => e.message).join(", "));
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -137,23 +155,23 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="firstName">Prénom</Label>
+                <Label htmlFor="firstname">Prénom</Label>
                 <Input
-                  id="firstName"
+                  id="firstname"
                   placeholder="Jean"
                   className="rounded-full"
-                  value={formData.firstName}
+                  value={formData.firstname}
                   onChange={handleInputChange}
                   required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="lastName">Nom</Label>
+                <Label htmlFor="lastname">Nom</Label>
                 <Input
-                  id="lastName"
+                  id="lastname"
                   placeholder="Dupont"
                   className="rounded-full"
-                  value={formData.lastName}
+                  value={formData.lastname}
                   onChange={handleInputChange}
                   required
                 />

@@ -28,6 +28,16 @@ import {
   X,
 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
+import z, { ZodError } from "zod";
+
+const schema = z.object({
+  firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+  lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+  email: z.email({ message: "L'email doit être valide" }),
+  phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }),
+  zipCode: z.number({ message: "Le code postal doit être un nombre" }),
+  city: z.string({ message: "La ville est requise" }),
+});
 
 export default function SubmitLeadPage() {
   const [selectedProduct, setSelectedProduct] = useState("");
@@ -41,8 +51,8 @@ export default function SubmitLeadPage() {
   const { register, handleSubmit, control, setValue, watch, reset } = useForm({
     defaultValues: {
       productType: "",
-      firstName: "",
-      lastName: "",
+      firstname: "",
+      lastname: "",
       email: "",
       phone: "",
       zipCode: "",
@@ -71,6 +81,8 @@ export default function SubmitLeadPage() {
     setLoading(true);
     setError(null);
     try {
+      schema.parse(data);
+
       const basePrice = isRdv ? (product?.appointmentPrice || 45.0) : (product?.basePrice || 25.0);
       const response = await fetch("/api/leads/submit", {
         method: "POST",
@@ -102,7 +114,11 @@ export default function SubmitLeadPage() {
       setIsRdv(false);
       setAvailabilitySlots([]);
     } catch (err: any) {
-      setError(err.message);
+      if (err instanceof ZodError) {
+          setError(err.issues.map(e => e.message).join(", "));
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -265,7 +281,7 @@ export default function SubmitLeadPage() {
               <div className="space-y-2">
                 <Label>Prénom</Label>
                 <Input
-                  {...register("firstName", { required: true })}
+                  {...register("firstname", { required: true })}
                   placeholder="Jean"
                   className="rounded-full"
                 />
@@ -274,7 +290,7 @@ export default function SubmitLeadPage() {
               <div className="space-y-2">
                 <Label>Nom</Label>
                 <Input
-                  {...register("lastName", { required: true })}
+                  {...register("lastname", { required: true })}
                   placeholder="Dupont"
                   className="rounded-full"
                 />

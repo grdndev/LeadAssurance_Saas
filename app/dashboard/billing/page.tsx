@@ -67,10 +67,10 @@ export default function BillingPage() {
                 fetch("/api/billing/stats"),
                 fetch("/api/billing/history")
             ]);
-            
+
             const statsData = await statsRes.json();
             const historyData = await historyRes.json();
-            
+
             setStats(statsData);
             setTransactions(historyData.transactions || []);
         } catch (err) {
@@ -157,7 +157,12 @@ export default function BillingPage() {
                             )}
                             <Button
                                 className="mt-4 w-full rounded-full shadow-lg shadow-primary/20"
-                                onClick={() => setShowRechargeDialog(true)}
+                                onClick={() => {
+                                    if (!selectedPack) {
+                                        setSelectedPack(CREDIT_PACKS[2]) // Pré-sélection du pack populaire
+                                    }
+                                    setShowRechargeDialog(true)
+                                }}
                             >
                                 <Plus className="h-4 w-4 mr-2" /> Recharger
                             </Button>
@@ -282,7 +287,7 @@ export default function BillingPage() {
                                     const isCreditPurchase = transaction.type === "CREDIT_PURCHASE";
                                     const isLeadSale = transaction.type === "LEAD_SALE";
                                     const isLeadPurchase = transaction.type === "LEAD_PURCHASE";
-                                    
+
                                     return (
                                         <div
                                             key={transaction.id}

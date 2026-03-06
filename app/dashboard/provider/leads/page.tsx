@@ -39,6 +39,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import z, { ZodError } from "zod";
 import { toast } from "sonner";
 
 const statusConfig = {
@@ -51,55 +52,55 @@ const statusConfig = {
 const translateAttributeKey = (key: string): string => {
     const translations: Record<string, string> = {
         // Personal Info
-        firstName: "Prénom",
-        lastName: "Nom",
+        firstname: "Prénom",
+        lastname: "Nom",
         phone: "Téléphone",
         email: "Email",
         zipCode: "Code postal",
         city: "Ville",
         address: "Adresse",
         birthDate: "Date de naissance",
-        
+
         // Status fields
         status: "Statut",
         amount: "Montant",
         seniority: "Ancienneté",
         usage: "Usage",
-        
+
         // Vehicle Info
         vehicleType: "Type de véhicule",
         vehicleBrand: "Marque",
         vehicleModel: "Modèle",
         vehicleYear: "Année",
         licensePlate: "Immatriculation",
-        
+
         // Insurance Info
         currentInsurer: "Assureur actuel",
         contractEndDate: "Fin de contrat",
         claimsHistory: "Historique sinistres",
         driverLicense: "Permis de conduire",
-        
+
         // Property Info
         propertyType: "Type de bien",
         propertySize: "Surface",
         rooms: "Nombre de pièces",
         constructionYear: "Année de construction",
         ownershipStatus: "Statut occupation",
-        
+
         // Professional Info
         companyName: "Nom entreprise",
         siret: "SIRET",
         activity: "Activité",
         employees: "Nombre d'employés",
         turnover: "Chiffre d'affaires",
-        
+
         // Credit Info
         loanAmount: "Montant emprunté",
         loanDuration: "Durée",
         loanPurpose: "Objet du prêt",
         monthlyIncome: "Revenus mensuels",
         creditScore: "Score crédit",
-        
+
         // Other
         projectDescription: "Description projet",
         budget: "Budget",
@@ -109,9 +110,18 @@ const translateAttributeKey = (key: string): string => {
         consentDate: "Date consentement",
         source: "Source",
     };
-    
+
     return translations[key] || key;
 };
+
+const schema = z.object({
+    firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+    lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+    email: z.email({ message: "L'email doit être valide" }),
+    phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }),
+    zipCode: z.number({ message: "Le code postal doit être un nombre" }),
+    city: z.string({ message: "La ville est requise" }),
+}).partial()
 
 export default function ProviderLeadsPage() {
     const [leads, setLeads] = useState<any[]>([]);
@@ -156,7 +166,7 @@ export default function ProviderLeadsPage() {
     const filteredLeads = leads.filter(lead => {
         const matchesStatus = filterStatus === "all" || lead.status === filterStatus;
         const matchesSearch = searchQuery === "" ||
-            lead.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            lead.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.city.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesStatus && matchesSearch;
     });
@@ -169,8 +179,8 @@ export default function ProviderLeadsPage() {
     const handleEditLead = (lead: any) => {
         setSelectedLead(lead);
         setEditForm({
-            firstName: lead.firstName,
-            lastName: lead.lastName,
+            firstname: lead.firstname,
+            lastname: lead.lastname,
             phone: lead.phone,
             email: lead.email,
             zipCode: lead.zipCode,
@@ -184,6 +194,8 @@ export default function ProviderLeadsPage() {
         if (!selectedLead) return;
         setEditSaving(true);
         try {
+            schema.parse(editForm);
+
             const res = await fetch(`/api/leads/${selectedLead.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -194,7 +206,11 @@ export default function ProviderLeadsPage() {
                 fetchLeads();
             }
         } catch (err) {
-            console.error("Edit error:", err);
+            if (err instanceof ZodError) {
+                toast.error(err.issues.map(e => e.message).join(", "));
+            } else {
+                console.error("Edit error:", err);
+            }
         } finally {
             setEditSaving(false);
         }
@@ -485,16 +501,16 @@ export default function ProviderLeadsPage() {
                             <div className="space-y-2">
                                 <Label>Prénom</Label>
                                 <Input
-                                    value={editForm.firstName || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                                    value={editForm.firstname || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, firstname: e.target.value })}
                                     className="rounded-full"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>Nom</Label>
                                 <Input
-                                    value={editForm.lastName || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                                    value={editForm.lastname || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, lastname: e.target.value })}
                                     className="rounded-full"
                                 />
                             </div>

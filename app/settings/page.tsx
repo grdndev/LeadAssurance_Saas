@@ -18,6 +18,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import z, { ZodError } from "zod";
+
+const schema = z.object({
+    firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+    lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+    email: z.email(),
+    phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }),
+    companyName: z.string().min(2).max(100),
+    siret: z.string().regex(/^\d{14}$/),
+    orias: z.string().min(2).max(100),
+    address: z.string().min(2).max(200),
+    password: z.string()
+    .min(8, "Le mot de passe doit faire au moins 8 caractères")
+    .regex(/[A-Z]/, "1 majuscule requise")
+    .regex(/[a-z]/, "1 minuscule requise")
+    .regex(/[0-9]/, "1 chiffre requis")
+    .regex(/[^A-Za-z0-9]/, "1 caractère spécial requis")
+}).partial()
 
 export default function SettingsPage() {
     const { data: session } = useSession();
@@ -68,6 +86,8 @@ export default function SettingsPage() {
         setSaving(true);
         setError(null);
         try {
+            schema.parse(formData);
+
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -81,8 +101,11 @@ export default function SettingsPage() {
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (err: any) {
-            console.log(err)
-            setError(err.message || "Erreur lors de la sauvegarde");
+            if (err instanceof ZodError) {
+                setError(err.issues.map(e => e.message).join(", "));
+            } else {
+                setError(err.message || "Erreur lors de la sauvegarde");
+            }
         } finally {
             setSaving(false);
         }
