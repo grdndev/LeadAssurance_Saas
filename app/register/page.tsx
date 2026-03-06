@@ -217,9 +217,9 @@ export default function RegisterPage() {
               <input type="checkbox" id="terms" className="mt-1 rounded" required />
               <Label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed">
                 J'accepte les{" "}
-                <Link href="#" className="text-primary hover:underline">Conditions Générales</Link>
+                <Link href="/cgu" className="text-primary hover:underline">Conditions Générales</Link>
                 {" "}et la{" "}
-                <Link href="#" className="text-primary hover:underline">Politique de Confidentialité</Link>
+                <Link href="/confidentialite" className="text-primary hover:underline">Politique de Confidentialité</Link>
               </Label>
             </div>
           </CardContent>
