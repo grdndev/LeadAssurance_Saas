@@ -74,11 +74,15 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                         <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-muted-foreground pt-4">
                             <div className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4" />
-                                <span>{article.publishedAt}</span>
+                                <span>{new Date(article.publishedAt).toLocaleDateString("fr-FR", {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                })}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4" />
-                                <span>{Math.ceil(article.duration / 60)} min de lecture</span>
+                                <span>{Math.ceil(article.duration / 60) + 1} min de lecture</span>
                             </div>
                         </div>
                     </div>

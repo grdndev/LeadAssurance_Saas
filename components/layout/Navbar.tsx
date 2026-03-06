@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, Menu, X, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { NotificationCenter } from "./NotificationCenter";
+import { getRoleLabel } from "@/lib/constants/rolelabels";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -15,15 +16,6 @@ export function Navbar() {
 
   const getInitials = (name: string) => {
     return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?";
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch(role) {
-      case "BROKER": return "Courtier";
-      case "PROVIDER": return "Apporteur";
-      case "ADMIN": return "Admin";
-      default: return "";
-    }
   };
 
   return (

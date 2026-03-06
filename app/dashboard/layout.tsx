@@ -22,6 +22,7 @@ import {
   Calendar,
   Key,
 } from "lucide-react";
+import { getRoleLabel } from "@/lib/constants/rolelabels";
 
 // Routes that only BROKERs may access
 const BROKER_ONLY = ["/dashboard/leads", "/dashboard/appointments", "/dashboard/billing"];
@@ -238,7 +239,7 @@ export default function DashboardLayout({
             <Link href="/settings" className="group flex items-center gap-3 ml-2 hover:opacity-80 transition-opacity cursor-pointer">
               <div className="hidden md:block text-right">
                 <p className="text-xs font-bold leading-none">{session?.user?.name}</p>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">{userRole}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{getRoleLabel(userRole ?? "")}</p>
               </div>
               <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg border-2 border-background transition-all group-hover:ring-2 group-hover:ring-primary/50">
                 {getInitials(session?.user?.name || "")}

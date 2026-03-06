@@ -84,7 +84,7 @@ export default function BlogPage() {
                                     <CardHeader className="pb-4">
                                         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-3">
                                             <span className="flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> {Math.ceil(article.duration / 60)} minutes
+                                                <Clock className="h-3 w-3" /> {Math.ceil(article.duration / 60) + 1} minutes
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <User className="h-3 w-3" /> {article.author.firstname ?? ""} {article.author.lastname ?? ""}
@@ -103,7 +103,11 @@ export default function BlogPage() {
                                             Lire l'article <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-4 pt-4 border-t border-border/50">
-                                            Publié le {article.publishedAt}
+                                            Publié le {new Date(article.publishedAt).toLocaleDateString("fr-FR", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                            })}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -120,13 +124,6 @@ export default function BlogPage() {
                     className="mt-16 sm:mt-24 p-8 sm:p-12 bg-gradient-to-r from-primary/10 to-primary/5 rounded-3xl border border-primary/20"
                 >
                     <div className="text-center max-w-2xl mx-auto">
-                        <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-                            Prêt à Protéger Votre Compagnon ?
-                        </h2>
-                        <p className="text-muted-foreground mb-6">
-                            Découvrez nos solutions d'assurance pour chiens et chats adaptées à tous les budgets.
-                            Comparez gratuitement les offres du marché.
-                        </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link href="/dashboard/marketplace">
                                 <Button size="lg" className="w-full sm:w-auto rounded-full px-8">

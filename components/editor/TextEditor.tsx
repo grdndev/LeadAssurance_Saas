@@ -65,7 +65,7 @@ export default function TextEditor({ content, onChange }: TextEditorProps) {
           </button>
           <button
             onClick={() =>
-              editor.chain().focus().setHeading({ level: 1 }).run()
+              editor.chain().focus().setHeading({ level: 2 }).run()
             }
             className={`border rounded ${editor.isActive('heading', { level: 2 }) ? 'bg-blue-500' : 'bg-gray-200 text-gray-500'}`}
           >
@@ -73,7 +73,7 @@ export default function TextEditor({ content, onChange }: TextEditorProps) {
           </button>
           <button
             onClick={() =>
-              editor.chain().focus().setHeading({ level: 1 }).run()
+              editor.chain().focus().setHeading({ level: 3 }).run()
             }
             className={`border rounded ${editor.isActive('heading', { level: 3 }) ? 'bg-blue-500' : 'bg-gray-200 text-gray-500'}`}
           >

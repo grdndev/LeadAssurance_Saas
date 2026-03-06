@@ -204,51 +204,27 @@ async function main() {
     // Seed some blog articles using the administrator as author
     const blogArticles = [
         {
-            title: "L'importance du dressage pour la sécurité de votre chien",
-            content: "Le dressage ne se résume pas à apprendre à votre chien à faire le \"beau\" ou à donner la patte. C'est un outil fondamental pour assurer sa sécurité et celle des autres."
+        "title": "Comprendre les assurances et choisir la protection adaptée à ses besoins",
+        "content": "<h1>Comprendre le fonctionnement des assurances</h1><p>L&apos;assurance est un mécanisme permettant de se protéger financièrement contre certains risques de la vie quotidienne. En échange d&apos;une cotisation régulière, appelée prime, l&apos;assuré bénéficie d&apos;une indemnisation si un événement couvert par le contrat survient.</p><h2>Pourquoi souscrire une assurance</h2><p>Les assurances permettent d&apos;anticiper les conséquences financières d&apos;un accident, d&apos;un sinistre ou d&apos;un imprévu. Elles jouent un rôle essentiel dans la protection des particuliers comme des entreprises.</p><ul><li><p>Protéger son patrimoine</p></li><li><p>Garantir une sécurité financière</p></li><li><p>Respecter certaines obligations légales</p></li></ul><h2>Les principaux types d&apos;assurances</h2><p>Il existe de nombreuses formes d&apos;assurances adaptées à des situations différentes.</p><ol><li><p><strong>Assurance habitation</strong> couvrant les dommages au logement et aux biens.</p></li><li><p><strong>Assurance automobile</strong> obligatoire pour tout véhicule circulant sur la voie publique.</p></li><li><p><strong>Assurance santé</strong> permettant de compléter les remboursements médicaux.</p></li><li><p><strong>Assurance vie</strong> utilisée pour l&apos;épargne et la transmission de patrimoine.</p></li></ol><hr><h3>Comment choisir la bonne assurance</h3><p>Pour sélectionner une assurance adaptée, il est important d&apos;évaluer ses besoins, de comparer les garanties et d&apos;analyser attentivement les exclusions prévues dans le contrat.</p><p><i>Une lecture attentive des conditions générales permet souvent d&apos;éviter de mauvaises surprises.</i></p><p><u>Comparer plusieurs offres reste la meilleure stratégie pour obtenir un bon niveau de protection au meilleur prix.</u></p>",
+        "excerpt": "Comprendre le fonctionnement des assurancesL&apos;assurance est un mécanisme permettant de se protéger fin",
+        "slug": "comprendre-les-assurances-et-choisir"
         },
         {
-            title: "Méthodes de Dressage Canin : Éducation Positive ou Traditionnelle ?",
-            content: "Il existe plusieurs méthodes de dressage, chacune avec ses avantages et ses inconvénients. Ce dossier compare l'approche positive à la méthode traditionnelle pour vous aider à choisir."
-        },
-        {
-            title: "Éduquer un Chiot : Le Guide Complet des Premiers Mois",
-            content: "Les premiers mois de votre chiot sont déterminants. Apprenez les bases de la socialisation, du rappel et de la propreté dans ce guide pratique."
-        },
-        {
-            title: "Comment Devenir Éducateur Canin Professionnel en France",
-            content: "Vous souhaitez transformer votre passion pour les chiens en métier ? Suivez nos conseils pour obtenir les formations nécessaires et démarrer en tant qu'éducateur canin."
-        },
-        {
-            title: "Assurance Chien & Chat : Comment Bien Choisir ?",
-            content: "Comparer les garanties, comprendre les exclusions et trouver le bon contrat pour votre compagnon : tout ce qu'il faut savoir pour bien choisir une assurance animaux."
-        },
+        "title": "Pourquoi comparer les assurances avant de choisir un contrat",
+        "content": "<h1>Comparer les assurances avant de souscrire</h1><p>Comparer les assurances est une étape essentielle avant de choisir un contrat. Chaque assureur propose des garanties, des tarifs et des conditions différentes. Prendre le temps d'analyser plusieurs offres permet d'éviter de payer trop cher pour une couverture insuffisante.</p><h2>Les éléments à analyser dans un contrat</h2><p>Un contrat d’assurance comporte plusieurs éléments importants qu’il faut examiner attentivement avant toute signature.</p><ul><li><p>Le niveau de garanties proposé</p></li><li><p>Le montant des franchises</p></li><li><p>Les exclusions de garantie</p></li><li><p>Le prix de la cotisation</p></li></ul><h2>L’importance des exclusions</h2><p>Les exclusions définissent les situations dans lesquelles l’assurance ne couvre pas les dommages. <strong>Lire ces clauses est indispensable</strong> pour comprendre les limites réelles du contrat.</p><p><i>Certaines exclusions peuvent fortement réduire l’intérêt d’une assurance si elles concernent des risques fréquents.</i></p><hr><h3>Utiliser les comparateurs d’assurance</h3><p>Les comparateurs permettent d’obtenir rapidement plusieurs devis et de visualiser les différences entre les contrats.</p><ol><li><p>Identifier ses besoins réels</p></li><li><p>Comparer plusieurs assureurs</p></li><li><p>Analyser les garanties proposées</p></li><li><p>Choisir le contrat le plus adapté</p></li></ol><p><u>Comparer reste la méthode la plus efficace pour trouver une assurance adaptée à son budget et à sa situation.</u></p>",
+        "excerpt": "Comparer les assurances avant de souscrireComparer les assurances est une étape essentielle avant de",
+        "slug": "pourquoi-comparer-les-assurances-avant"
+        }
     ];
 
     for (const art of blogArticles) {
-        let slug = art.title
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .split(' ')
-            .slice(0, 5)
-            .join('-');
-        const exists = await prisma.article.count({ where: { slug } });
-        if (exists > 0) {
-            slug += `-${exists + 1}`;
-        }
-        const excerpt = art.content.length > 100 ? `${art.content.substring(0, 100)}...` : art.content;
-        const duration = Math.ceil(art.content.length / 1000);
-
         const createdArticle = await prisma.article.upsert({
-            where: { slug },
+            where: { slug: art.slug },
             update: {},
             create: {
-                slug,
-                title: art.title,
-                content: art.content,
-                excerpt,
-                duration,
+                ...art,
                 userId: admin.id,
+                duration: 10,
                 published: true,
                 publishedAt: new Date(),
             },

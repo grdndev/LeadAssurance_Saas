@@ -26,7 +26,7 @@ export function RelatedArticles({ articles, currentArticleSlug }: RelatedArticle
                                 <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors">
                                     {article.title}
                                 </h3>
-                                <p className="text-xs text-muted-foreground">{Math.ceil(article.duration / 60)} min de lecture</p>
+                                <p className="text-xs text-muted-foreground">{Math.ceil(article.duration / 60) + 1} min de lecture</p>
                                 <span className="inline-flex items-center text-xs font-medium text-primary">
                                     Lire l&apos;article <ArrowRight className="h-3 w-3 ml-1" />
                                 </span>
