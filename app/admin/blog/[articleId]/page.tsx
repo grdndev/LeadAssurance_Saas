@@ -76,10 +76,10 @@ export default function ArticlePage({ params }: { params: Promise<{ articleId: s
 
     const handlePublish = async () => {
         try {
-            const res = await fetch(`/api/admin/blog`, {
+            const res = await fetch(`/api/admin/blog/publish`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: articleId, published: !article.published })
+                body: JSON.stringify({ id: articleId })
             });
 
             if (res.ok) {

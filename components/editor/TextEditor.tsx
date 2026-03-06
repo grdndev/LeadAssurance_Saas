@@ -1,9 +1,8 @@
-"use client"; // nécessaire pour Next.js 13+ app router
+"use client";
 
 import './style.css';
 import { Bold, Code, CornerDownLeft, Heading1, Heading2, Heading3, Italic, Link, List, ListOrdered, Minus, Quote, Redo, Strikethrough, Type, Underline as UnderlineIcon, Undo } from 'lucide-react';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { forwardRef, useImperativeHandle } from 'react';
 import { useEffect, useState } from 'react';
 import DragHandle from '@tiptap/extension-drag-handle-react';
 import StarterKit from '@tiptap/starter-kit';

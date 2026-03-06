@@ -65,17 +65,18 @@ export default function AdminDashboard() {
         router.push(`/admin/blog/${id}`);
     }
 
-    const handlePublishArticle = async (id: string, published: boolean) => {
+    const handlePublishArticle = async (id: string) => {
         try {
-            const res = await fetch("/api/admin/blog", {
+            const res = await fetch("/api/admin/blog/publish", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, published})
+                body: JSON.stringify({ id })
             });
             if (res.ok) {
-                toast.success(`Article ${published ? 'Publié' : 'Non publié'}`);
+                const json = await res.json();
+                toast.success(`Article ${json.article.published ? 'Publié' : 'Non publié'}`);
                 setArticles(prev => prev.map(a => {
-                    if (a.id === id) a.published = published
+                    if (a.id === id) a.published = json.article.published
                     return a;
                 }));
             }
@@ -143,7 +144,7 @@ export default function AdminDashboard() {
                                         >
                                         <Pencil className="h-4 w-4 mr-1" /> Modifier
                                     </Button>
-                                    <Button size="sm" variant={a.published ? "default" : "ghost"} onClick={() => handlePublishArticle(a.id, !a.published)}>
+                                    <Button size="sm" variant={a.published ? "default" : "ghost"} onClick={() => handlePublishArticle(a.id)}>
                                         {a.published ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                                     </Button>
                                     <Button size="icon" variant="destructive" onClick={() => handleDeleteArticle(a.id)}>
