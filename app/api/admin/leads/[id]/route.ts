@@ -14,7 +14,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { firstName, lastName, phone, email, zipCode, city, price } = await request.json();
+        const { firstname, lastname, phone, email, zipCode, city, price } = await request.json();
 
         if (!leadId) {
             return NextResponse.json({ error: "Une erreur s'est produite" }, { status: 400 });
@@ -23,8 +23,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const updatedLead = await prisma.lead.update({
             where: { id: leadId },
             data: {
-                firstName,
-                lastName,
+                firstname,
+                lastname,
                 phone,
                 email,
                 zipCode,

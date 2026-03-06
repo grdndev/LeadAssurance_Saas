@@ -21,8 +21,8 @@ export interface LeadFilters {
 
 export interface CreateLeadInput {
     productType: string;
-    firstName: string;
-    lastName: string;
+    firstname: string;
+    lastname: string;
     email: string;
     phone: string;
     zipCode: string;
@@ -58,8 +58,8 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         id: "lead-1",
         productType: "CREDIT_IMMO",
         status: "STOCK",
-        firstName: "Jean",
-        lastName: "Dupont",
+        firstname: "Jean",
+        lastname: "Dupont",
         email: "jean.dupont@email.com",
         phone: "0601020304",
         zipCode: "75001",
@@ -97,8 +97,8 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         id: "lead-2",
         productType: "ASSURANCE_EMPRUNTEUR",
         status: "STOCK",
-        firstName: "Marie",
-        lastName: "Martin",
+        firstname: "Marie",
+        lastname: "Martin",
         email: "m.martin@email.com",
         phone: "0612345678",
         zipCode: "69002",
@@ -136,8 +136,8 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         id: "lead-3",
         productType: "MUTUELLE_SANTE_IND",
         status: "STOCK",
-        firstName: "Pierre",
-        lastName: "Durand",
+        firstname: "Pierre",
+        lastname: "Durand",
         email: "p.durand@email.com",
         phone: "0698765432",
         zipCode: "13008",
@@ -175,8 +175,8 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         id: "lead-4",
         productType: "RACHAT_CREDIT",
         status: "STOCK",
-        firstName: "Sophie",
-        lastName: "Bernard",
+        firstname: "Sophie",
+        lastname: "Bernard",
         email: "s.bernard@email.com",
         phone: "0687654321",
         zipCode: "33000",
@@ -214,8 +214,8 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         id: "lead-5",
         productType: "DEFISCALISATION",
         status: "STOCK",
-        firstName: "François",
-        lastName: "Petit",
+        firstname: "François",
+        lastname: "Petit",
         email: "f.petit@email.com",
         phone: "0654321098",
         zipCode: "31000",
@@ -253,8 +253,8 @@ export const MOCK_LEADS: Omit<LeadWithRelations, "provider" | "broker">[] = [
         id: "lead-6",
         productType: "ASSURANCE_VIE_RETRAITE",
         status: "STOCK",
-        firstName: "Catherine",
-        lastName: "Moreau",
+        firstname: "Catherine",
+        lastname: "Moreau",
         email: "c.moreau@email.com",
         phone: "0623456789",
         zipCode: "44000",

@@ -134,8 +134,8 @@ export default function MyLeadsPage() {
         const matchesStatus = filterStatus === "all" ||
             (filterStatus === "SOLD" ? !lead.brokerStatus : lead.brokerStatus === filterStatus);
         const matchesSearch = searchQuery === "" ||
-            lead.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            lead.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            lead.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            lead.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
             lead.city.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesStatus && matchesSearch;
     });
@@ -205,7 +205,7 @@ export default function MyLeadsPage() {
                                                 </div>
                                                 <div className="space-y-1 flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <h3 className="font-bold text-lg">{lead.firstName} {lead.lastName}</h3>
+                                                        <h3 className="font-bold text-lg">{lead.firstname} {lead.lastname}</h3>
                                                         {lead.isAppointment && (
                                                             <Badge variant="secondary" className="text-xs">RDV</Badge>
                                                         )}

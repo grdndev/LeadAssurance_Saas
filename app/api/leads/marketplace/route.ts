@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
                 createdAt: true,
                 attributes: true,
                 // Ne pas révéler les coordonnées avant l'achat
-                firstName: false,
-                lastName: false,
+                firstname: false,
+                lastname: false,
                 phone: false,
                 email: false
             },

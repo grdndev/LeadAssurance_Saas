@@ -45,8 +45,8 @@ model Lead {
   status          LeadStatus     @default(STOCK)
 
   // Champs Communs (Section 3 du CDC)
-  firstName       String
-  lastName        String
+  firstname       String
+  lastname        String
   phone           String
   email           String
   zipCode         String

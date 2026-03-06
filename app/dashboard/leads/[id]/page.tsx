@@ -176,7 +176,7 @@ export default function LeadDetailPage() {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold">{lead.firstName} {lead.lastName}</h1>
+                    <h1 className="text-2xl font-bold">{lead.firstname} {lead.lastname}</h1>
                     <p className="text-muted-foreground text-sm">{product?.name} · Lead #{lead.id.slice(-8).toUpperCase()}</p>
                 </div>
                 {/* CRM Status Dropdown */}

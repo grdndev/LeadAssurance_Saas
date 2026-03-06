@@ -19,8 +19,8 @@ export async function POST(req: Request) {
         const body = await req.json();
         const {
             productType,
-            firstName,
-            lastName,
+            firstname,
+            lastname,
             email,
             phone,
             zipCode,
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         } = body;
 
         // Validation basique
-        if (!productType || !firstName || !lastName || !email || !phone || !consentText) {
+        if (!productType || !firstname || !lastname || !email || !phone || !consentText) {
             return NextResponse.json(
                 { error: "Données obligatoires manquantes" },
                 { status: 400 }
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
         const timestamp = new Date().toISOString();
 
         // Créer le hash de preuve (SHA-256)
-        const proofString = `${firstName}${lastName}${email}${consentText}${timestamp}${ipAddress}`;
+        const proofString = `${firstname}${lastname}${email}${consentText}${timestamp}${ipAddress}`;
         const proofHash = await crypto.subtle.digest(
             'SHA-256',
             new TextEncoder().encode(proofString)
@@ -83,8 +83,8 @@ export async function POST(req: Request) {
         const lead = await prisma.lead.create({
             data: {
                 productType,
-                firstName,
-                lastName,
+                firstname,
+                lastname,
                 email,
                 phone,
                 zipCode,

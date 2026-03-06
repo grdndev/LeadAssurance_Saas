@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
                 });
 
                 // Validation basique
-                if (!row.productType || !row.firstName || !row.lastName ||
+                if (!row.productType || !row.firstname || !row.lastname ||
                     !row.phone || !row.email || !row.zipCode || !row.city) {
                     results.rejected++;
                     results.errors.push({ line: i + 1, error: "Missing required fields" });
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
                 }
 
                 // Créer le hash de preuve
-                const proofString = `${row.firstName}${row.lastName}${row.email}${row.consentText}${Date.now()}${row.ipAddress}`;
+                const proofString = `${row.firstname}${row.lastname}${row.email}${row.consentText}${Date.now()}${row.ipAddress}`;
                 const proofHash = await crypto.subtle.digest(
                     'SHA-256',
                     new TextEncoder().encode(proofString)
@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
                     data: {
                         providerId,
                         productType: row.productType,
-                        firstName: row.firstName,
-                        lastName: row.lastName,
+                        firstname: row.firstname,
+                        lastname: row.lastname,
                         phone: row.phone,
                         email: row.email,
                         zipCode: row.zipCode,

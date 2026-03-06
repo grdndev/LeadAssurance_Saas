@@ -29,8 +29,8 @@ interface ProductConfig {
 
 interface FormData {
     productType: string;
-    firstName: string;
-    lastName: string;
+    firstname: string;
+    lastname: string;
     email: string;
     phone: string;
     zipCode: string;
@@ -46,8 +46,8 @@ export default function LeadFormTemplate({ config }: { config: ProductConfig }) 
 
     const [formData, setFormData] = useState<FormData>({
         productType: config.productType,
-        firstName: "",
-        lastName: "",
+        firstname: "",
+        lastname: "",
         email: "",
         phone: "",
         zipCode: "",
@@ -84,7 +84,7 @@ export default function LeadFormTemplate({ config }: { config: ProductConfig }) 
     };
 
     const handleInputChange = (field: string, value: any) => {
-        if (["firstName", "lastName", "email", "phone", "zipCode", "city"].includes(field)) {
+        if (["firstname", "lastname", "email", "phone", "zipCode", "city"].includes(field)) {
             setFormData({ ...formData, [field]: value });
         } else {
             setFormData({
@@ -149,8 +149,8 @@ export default function LeadFormTemplate({ config }: { config: ProductConfig }) 
                                             required
                                             className="rounded-full"
                                             placeholder="Jean"
-                                            value={formData.firstName}
-                                            onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                            value={formData.firstname}
+                                            onChange={(e) => handleInputChange("firstname", e.target.value)}
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -159,8 +159,8 @@ export default function LeadFormTemplate({ config }: { config: ProductConfig }) 
                                             required
                                             className="rounded-full"
                                             placeholder="Dupont"
-                                            value={formData.lastName}
-                                            onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                            value={formData.lastname}
+                                            onChange={(e) => handleInputChange("lastname", e.target.value)}
                                         />
                                     </div>
                                     <div className="space-y-2">

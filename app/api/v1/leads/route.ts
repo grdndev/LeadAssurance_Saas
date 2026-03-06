@@ -46,8 +46,8 @@ export async function POST(req: Request) {
         const body = await req.json();
         const {
             productType,
-            firstName,
-            lastName,
+            firstname,
+            lastname,
             email,
             phone,
             zipCode,
@@ -59,23 +59,23 @@ export async function POST(req: Request) {
             urlSource,
         } = body;
 
-        if (!productType || !firstName || !lastName || !email || !phone || !consentText) {
-            return NextResponse.json({ error: "Champs obligatoires manquants: productType, firstName, lastName, email, phone, consentText" }, { status: 400 });
+        if (!productType || !firstname || !lastname || !email || !phone || !consentText) {
+            return NextResponse.json({ error: "Champs obligatoires manquants: productType, firstname, lastname, email, phone, consentText" }, { status: 400 });
         }
 
         const ipAddress = req.headers.get("x-forwarded-for") || "0.0.0.0";
         const userAgent = req.headers.get("user-agent") || "api-client";
         const timestamp = new Date().toISOString();
 
-        const proofString = `${firstName}${lastName}${email}${consentText}${timestamp}${ipAddress}`;
+        const proofString = `${firstname}${lastname}${email}${consentText}${timestamp}${ipAddress}`;
         const proofHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(proofString))
             .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join(""));
 
         const lead = await prisma.lead.create({
             data: {
                 productType,
-                firstName,
-                lastName,
+                firstname,
+                lastname,
                 email,
                 phone,
                 zipCode: zipCode || "",

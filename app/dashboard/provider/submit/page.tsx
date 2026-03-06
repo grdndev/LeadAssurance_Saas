@@ -29,15 +29,7 @@ import {
 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import z, { ZodError } from "zod";
-
-const schema = z.object({
-  firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
-  lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
-  email: z.email({ message: "L'email doit être valide" }),
-  phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }),
-  zipCode: z.number({ message: "Le code postal doit être un nombre" }),
-  city: z.string({ message: "La ville est requise" }),
-});
+import { leadBaseSchema } from "@/lib/validations/leads";
 
 export default function SubmitLeadPage() {
   const [selectedProduct, setSelectedProduct] = useState("");
@@ -81,7 +73,7 @@ export default function SubmitLeadPage() {
     setLoading(true);
     setError(null);
     try {
-      schema.parse(data);
+      leadBaseSchema.partial().parse(data);
 
       const basePrice = isRdv ? (product?.appointmentPrice || 45.0) : (product?.basePrice || 25.0);
       const response = await fetch("/api/leads/submit", {

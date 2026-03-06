@@ -14,7 +14,7 @@ import z, { ZodError } from "zod";
 const schema = z.object({
   firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
   lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
-  email: z.email(),
+  email: z.email("Email invalide"),
   password: z.string()
   .min(8, "Le mot de passe doit faire au moins 8 caractères")
   .regex(/[A-Z]/, "1 majuscule requise")

@@ -83,8 +83,8 @@ model Lead {
   leadType        String         @default("LEAD") // LEAD, APPOINTMENT
 
   // Basic Info
-  firstName       String
-  lastName        String
+  firstname       String
+  lastname        String
   phone           String
   email           String
   zipCode         String

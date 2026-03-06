@@ -75,7 +75,7 @@ export async function PATCH(
         }
 
         // Whitelist of editable fields
-        const allowedFields = ["firstName", "lastName", "phone", "email", "zipCode", "city"];
+        const allowedFields = ["firstname", "lastname", "phone", "email", "zipCode", "city"];
         const data: Record<string, string> = {};
 
         for (const field of allowedFields) {

@@ -28,7 +28,7 @@ export const ConsentPDF: React.FC<ConsentPDFProps> = ({ lead, consent }) => (
 
             <View style={styles.section}>
                 <Text style={styles.label}>IDENTITÉ DU PROSPECT</Text>
-                <Text style={styles.value}>{lead.firstName} {lead.lastName}</Text>
+                <Text style={styles.value}>{lead.firstname} {lead.lastname}</Text>
                 <Text style={styles.label}>EMAIL & TÉLÉPHONE</Text>
                 <Text style={styles.value}>{lead.email} | {lead.phone}</Text>
             </View>

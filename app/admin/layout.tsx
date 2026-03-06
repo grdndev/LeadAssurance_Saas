@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (status === "authenticated" && (session?.user as any)?.role !== "ADMIN") {
       router.push("/dashboard");
     }
-  }, []);
+  }, [status]);
 
   // Show nothing while session resolves (avoids flash of wrong nav)
   if (status === "loading") {

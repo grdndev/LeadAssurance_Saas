@@ -23,7 +23,7 @@ import z, { ZodError } from "zod";
 const schema = z.object({
     firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
     lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
-    email: z.email(),
+    email: z.email("Email invalide"),
     phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }),
     companyName: z.string().min(2).max(100),
     siret: z.string().regex(/^\d{14}$/),

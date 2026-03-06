@@ -67,7 +67,7 @@ export default function MarketplacePage() {
       const leadsRes = await fetch("/api/marketplace/leads");
       const leadsData = await leadsRes.json();
       setLeads(leadsData.leads || []);
-      
+
       // Only fetch profile if authenticated
       if (status === "authenticated") {
         const profileRes = await fetch("/api/user/profile");
@@ -110,7 +110,7 @@ export default function MarketplacePage() {
       router.push("/login?redirect=/dashboard/marketplace");
       return;
     }
-    
+
     setSelectedLeadForPurchase(lead);
     setReservedLead(lead.id);
     setTimeLeft(600);
@@ -501,7 +501,7 @@ export default function MarketplacePage() {
                   <div className="w-full p-4 bg-secondary/30 rounded-xl space-y-2 mt-4">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Nom</span>
-                      <span className="font-bold">{boughtLeadDetails.firstName} {boughtLeadDetails.lastName}</span>
+                      <span className="font-bold">{boughtLeadDetails.firstname} {boughtLeadDetails.lastname}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Téléphone</span>

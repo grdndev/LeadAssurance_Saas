@@ -2,11 +2,11 @@ import { z } from "zod";
 
 // Schéma de base pour un lead
 export const leadBaseSchema = z.object({
-    firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-    lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+    firstname: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+    lastname: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
     phone: z.string().regex(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/, "Numéro de téléphone français invalide"),
-    email: z.string().email("Email invalide"),
-    zipCode: z.string().regex(/^\d{5}$/, "Code postal invalide (5 chiffres)"),
+    email: z.email("Email invalide"),
+    zipCode: z.string().regex(/^\d{5}$/, "Le code postal doit être un nombre de 5 chiffres"),
     city: z.string().min(2, "Ville invalide"),
 });
 
@@ -48,7 +48,7 @@ export const marketplaceFiltersSchema = z.object({
     productType: z.string().optional(),
     minPrice: z.number().positive().optional(),
     maxPrice: z.number().positive().optional(),
-    zipCode: z.string().regex(/^\d{5}$/).optional(),
+    zipCode: z.string().regex(/^\d{5}$/, "Le code postal doit être un nombre de 5 chiffres").optional(),
     isExclusive: z.boolean().optional(),
     isAppointment: z.boolean().optional(),
     page: z.number().int().positive().default(1),

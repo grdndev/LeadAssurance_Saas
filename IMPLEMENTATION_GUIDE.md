@@ -1,28 +1,28 @@
 # 🚀 GUIDE D'IMPLÉMENTATION FINALE
 # LeadsAssurance.com - Checklist de finalisation
 
-## ✅ **ÉTAT ACTUEL** 
+## ✅ **ÉTAT ACTUEL**
 
 ### Complété à 85%
 
-✅ Architecture Next.js 16 + Prisma + PostgreSQL  
-✅ 18 produits définis avec champs dynamiques  
-✅ Interface courtier (dashboard, leads, marketplace, billing)  
-✅ Interface apporteur (soumission, suivi)  
-✅ Interface admin (dashboard, validation)  
-✅ APIs backend (/api/leads, /api/users, /api/cron)  
-✅ Système de réservation atomique  
-✅ Preuves de consentement RGPD  
-✅ Design system premium  
-✅ Formulaires publics de capture de leads  
+✅ Architecture Next.js 16 + Prisma + PostgreSQL
+✅ 18 produits définis avec champs dynamiques
+✅ Interface courtier (dashboard, leads, marketplace, billing)
+✅ Interface apporteur (soumission, suivi)
+✅ Interface admin (dashboard, validation)
+✅ APIs backend (/api/leads, /api/users, /api/cron)
+✅ Système de réservation atomique
+✅ Preuves de consentement RGPD
+✅ Design system premium
+✅ Formulaires publics de capture de leads
 
 ---
 
 ## ⚠️ **À FINALISER (15%) - PRIORITÉ HAUTE**
 
-### 1. **Base de données PostgreSQL**  
-**Status**: Configuration requise  
-**Temps estimé**: 1h  
+### 1. **Base de données PostgreSQL**
+**Status**: Configuration requise
+**Temps estimé**: 1h
 
 #### Actions :
 ```bash
@@ -47,9 +47,9 @@ npx prisma studio
 
 ---
 
-### 2. **Authentification NextAuth.js**  
-**Status**: Pages login/register créées mais pas connectées  
-**Temps estimé**: 3h  
+### 2. **Authentification NextAuth.js**
+**Status**: Pages login/register créées mais pas connectées
+**Temps estimé**: 3h
 
 #### Actions :
 ```bash
@@ -76,16 +76,16 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
-        
+
         if (!user || !user.password) return null;
-        
+
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
-        
+
         return { id: user.id, email: user.email, role: user.role };
       }
     })
@@ -120,9 +120,9 @@ model User {
 
 ---
 
-### 3. **Intégration Stripe**  
-**Status**: UI ready, paiements à connecter  
-**Temps estimé**: 4h  
+### 3. **Intégration Stripe**
+**Status**: UI ready, paiements à connecter
+**Temps estimé**: 4h
 
 #### Actions :
 ```bash
@@ -200,9 +200,9 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ---
 
-### 4. **Export PDF des preuves de consentement**  
-**Status**: Bouton présent, génération à implémenter  
-**Temps estimé**: 2h  
+### 4. **Export PDF des preuves de consentement**
+**Status**: Bouton présent, génération à implémenter
+**Temps estimé**: 2h
 
 #### Actions :
 ```bash
@@ -231,7 +231,7 @@ export const ConsentCertificatePDF = ({ lead }: any) => (
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Prospect:</Text>
-        <Text style={styles.value}>{lead.firstName} {lead.lastName}</Text>
+        <Text style={styles.value}>{lead.firstname} {lead.lastname}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Texte de consentement:</Text>
@@ -289,9 +289,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 ---
 
-### 5. **Cron Job Vercel**  
-**Status**: Endpoint créé, à déployer  
-**Temps estimé**: 30min  
+### 5. **Cron Job Vercel**
+**Status**: Endpoint créé, à déployer
+**Temps estimé**: 30min
 
 #### Fichier : `vercel.json` (racine du projet)
 ```json

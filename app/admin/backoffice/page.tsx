@@ -98,8 +98,8 @@ export default function AdminDashboard() {
     const handleEditLead = (lead: any) => {
         setSelectedLead(lead);
         setEditForm({
-            firstName: lead.firstName,
-            lastName: lead.lastName,
+            firstname: lead.firstname,
+            lastname: lead.lastname,
             phone: lead.phone,
             email: lead.email,
             zipCode: lead.zipCode,
@@ -278,16 +278,16 @@ export default function AdminDashboard() {
                             <div className="space-y-2">
                                 <Label>Prénom</Label>
                                 <Input
-                                    value={editForm.firstName || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                                    value={editForm.firstname || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, firstname: e.target.value })}
                                     className="rounded-full"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>Nom</Label>
                                 <Input
-                                    value={editForm.lastName || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                                    value={editForm.lastname || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, lastname: e.target.value })}
                                     className="rounded-full"
                                 />
                             </div>

@@ -148,8 +148,8 @@ export default function ProviderApiKeysPage() {
                         <p className="text-xs text-muted-foreground mb-2 font-semibold">Corps JSON requis :</p>
                         <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">{`{
   "productType": "ASSURANCE_AUTO",
-  "firstName": "Jean",
-  "lastName": "Dupont",
+  "firstname": "Jean",
+  "lastname": "Dupont",
   "email": "jean@example.com",
   "phone": "0612345678",
   "zipCode": "75001",

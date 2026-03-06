@@ -83,8 +83,8 @@ export async function POST(request: NextRequest) {
         const {
             providerId,
             productType,
-            firstName,
-            lastName,
+            firstname,
+            lastname,
             phone,
             email,
             zipCode,
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         } = body;
 
         // Validation des champs obligatoires
-        if (!providerId || !productType || !firstName || !lastName || !phone || !email || !zipCode || !city || !consent) {
+        if (!providerId || !productType || !firstname || !lastname || !phone || !email || !zipCode || !city || !consent) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Créer le hash de preuve (SHA-256)
-        const proofString = `${firstName}${lastName}${email}${consent.consentText}${consent.timestamp}${consent.ipAddress}`;
+        const proofString = `${firstname}${lastname}${email}${consent.consentText}${consent.timestamp}${consent.ipAddress}`;
         const proofHash = await crypto.subtle.digest(
             'SHA-256',
             new TextEncoder().encode(proofString)
@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
             data: {
                 providerId,
                 productType,
-                firstName,
-                lastName,
+                firstname,
+                lastname,
                 phone,
                 email,
                 zipCode,

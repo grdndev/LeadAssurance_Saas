@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
       { city: "Bordeaux", zipCode: "33000" },
     ];
 
-    const firstNames = ["Jean", "Marie", "Pierre", "Sophie", "Luc", "Anne", "Paul", "Claire"];
-    const lastNames = ["Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand"];
+    const firstnames = ["Jean", "Marie", "Pierre", "Sophie", "Luc", "Anne", "Paul", "Claire"];
+    const lastnames = ["Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand"];
 
     const createdLeads = [];
     const createdNotifications = [];
@@ -54,13 +54,13 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < numLeads; i++) {
       const productType = productTypes[Math.floor(Math.random() * productTypes.length)];
       const location = cities[Math.floor(Math.random() * cities.length)];
-      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const firstname = firstnames[Math.floor(Math.random() * firstnames.length)];
+      const lastname = lastnames[Math.floor(Math.random() * lastnames.length)];
       const price = Math.floor(Math.random() * 50) + 20; // 20-70€
-      
+
       // More STOCK leads for "last opportunities" section
       const status = Math.random() > 0.3 ? "STOCK" : "SOLD";
-      
+
       // Create leads with varying ages for realistic "last opportunities"
       const daysAgo = Math.floor(Math.random() * 3); // 0-2 days ago
       const createdAt = new Date();
@@ -72,10 +72,10 @@ export async function POST(req: NextRequest) {
           productType,
           status,
           leadType: "LEAD",
-          firstName,
-          lastName,
+          firstname,
+          lastname,
           phone: `06${Math.floor(Math.random() * 90000000) + 10000000}`,
-          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+          email: `${firstname.toLowerCase()}.${lastname.toLowerCase()}@example.com`,
           zipCode: location.zipCode,
           city: location.city,
           attributes: JSON.stringify({
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
 
     for (let i = 0; i < numNotifications; i++) {
       const notif = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
-      
+
       const notification = await prisma.notification.create({
         data: {
           userId: user.id,
@@ -126,28 +126,28 @@ export async function POST(req: NextRequest) {
 
     for (let i = 0; i < numTransactions; i++) {
       const transactionType = Math.random() > 0.6 ? "CREDIT_PURCHASE" : "LEAD_PURCHASE";
-      const amount = transactionType === "CREDIT_PURCHASE" 
+      const amount = transactionType === "CREDIT_PURCHASE"
         ? Math.floor(Math.random() * 400) + 100  // 100-500€ credit purchase
         : Math.floor(Math.random() * 60) + 20;    // 20-80€ lead purchase
-      
+
       const daysAgo = Math.floor(Math.random() * 30); // Last 30 days
       const createdAt = new Date();
       createdAt.setDate(createdAt.getDate() - daysAgo);
-      
+
       await prisma.transaction.create({
         data: {
           userId: user.id,
           type: transactionType,
           amount,
           credits: transactionType === "CREDIT_PURCHASE" ? amount : -amount,
-          description: transactionType === "CREDIT_PURCHASE" 
+          description: transactionType === "CREDIT_PURCHASE"
             ? `Recharge de crédits ${amount.toFixed(2)} €`
             : `Achat lead ${productTypes[Math.floor(Math.random() * productTypes.length)]}`,
           createdAt,
         },
       });
     }
-    
+
     // Update user credits with a reasonable amount
     const creditAmount = Math.floor(Math.random() * 800) + 200; // 200-1000€
     await prisma.user.update({

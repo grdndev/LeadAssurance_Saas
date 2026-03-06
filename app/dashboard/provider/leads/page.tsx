@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import z, { ZodError } from "zod";
 import { toast } from "sonner";
+import { leadBaseSchema } from "@/lib/validations/leads";
 
 const statusConfig = {
     STOCK: { label: "En stock", color: "bg-blue-500", icon: CheckCircle2 },
@@ -114,15 +115,6 @@ const translateAttributeKey = (key: string): string => {
     return translations[key] || key;
 };
 
-const schema = z.object({
-    firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
-    lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
-    email: z.email({ message: "L'email doit être valide" }),
-    phone: z.string().regex(/(\+\d{11,12})|(^0\d{9})|(^$)/, { error: "Veuillez entrer un numéro de téléphone valide" }),
-    zipCode: z.number({ message: "Le code postal doit être un nombre" }),
-    city: z.string({ message: "La ville est requise" }),
-}).partial()
-
 export default function ProviderLeadsPage() {
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -194,7 +186,7 @@ export default function ProviderLeadsPage() {
         if (!selectedLead) return;
         setEditSaving(true);
         try {
-            schema.parse(editForm);
+            leadBaseSchema.parse(editForm);
 
             const res = await fetch(`/api/leads/${selectedLead.id}`, {
                 method: "PATCH",
