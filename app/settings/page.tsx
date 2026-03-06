@@ -255,17 +255,6 @@ export default function SettingsPage() {
                             <Input type="password" placeholder="••••••••" className="rounded-full"  value={formData.confirm ?? ""} onChange={(e) => handleChange("confirm", e.target.value)}/>
                         </div>
                     </div>
-
-                    <div className="p-4 rounded-xl bg-secondary/30 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Key className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                                <div className="font-medium">Authentification à deux facteurs</div>
-                                <div className="text-xs text-muted-foreground">Ajoutez une couche de sécurité supplémentaire.</div>
-                            </div>
-                        </div>
-                        <Button variant="outline" size="sm" className="rounded-full">Activer</Button>
-                    </div>
                 </CardContent>
             </Card>
 
