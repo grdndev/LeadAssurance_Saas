@@ -14,7 +14,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
         if (status !== "authenticated" && status !== "loading") {
             router.push("/login");
         }
-    }, []);
+    }, [status]);
 
     if (status === "loading") {
     return (
