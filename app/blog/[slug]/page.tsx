@@ -78,7 +78,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                             </div>
                             <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4" />
-                                <span>{Math.floor(article.duration / 60)} min de lecture</span>
+                                <span>{Math.ceil(article.duration / 60)} min de lecture</span>
                             </div>
                         </div>
                     </div>

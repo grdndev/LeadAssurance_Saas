@@ -84,7 +84,7 @@ export default function BlogPage() {
                                     <CardHeader className="pb-4">
                                         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-3">
                                             <span className="flex items-center gap-1">
-                                                <Clock className="h-3 w-3" /> {Math.floor(article.duration / 60)} minutes
+                                                <Clock className="h-3 w-3" /> {Math.ceil(article.duration / 60)} minutes
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <User className="h-3 w-3" /> {article.author.firstname ?? ""} {article.author.lastname ?? ""}
