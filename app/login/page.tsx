@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
+import { signIn, getSession, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,31 @@ import { Label } from "@/components/ui/label";
 import { ShieldCheck, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const role = (session?.user as any)?.role;
+
+    if (role === "ADMIN") {
+      router.push("/admin");
+    } else if (role === "PROVIDER") {
+      router.push("/dashboard/provider");
+    } else if (role) {
+      router.push("/dashboard");
+    }
+  }, [session]);
+
+  if (status === "loading" || status === "authenticated") {
+    return <div className="min-h-screen bg-secondary/30 flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+    </div>;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,18 +51,6 @@ export default function LoginPage() {
 
       if (res?.error) {
         setError("Identifiants incorrects ou compte non trouvé.");
-      } else {
-        // Role-based redirect
-        const session = await getSession();
-        const role = (session?.user as any)?.role;
-        if (role === "ADMIN") {
-          router.push("/admin");
-        } else if (role === "PROVIDER") {
-          router.push("/dashboard/provider");
-        } else {
-          router.push("/dashboard");
-        }
-        router.refresh();
       }
     } catch (err) {
       setError("Une erreur est survenue lors de la connexion.");
