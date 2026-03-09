@@ -2,6 +2,19 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { writeAuditLog } from "@/lib/audit";
+import z, { ZodError } from "zod";
+
+const schema = z.object({
+  firstname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le prénom ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+  lastname: z.string().regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, "Le nom de famille ne doit contenir que des lettres, espaces, apostrophes ou tirets"),
+  email: z.email("Email invalide"),
+  password: z.string()
+  .min(8, "Le mot de passe doit faire au moins 8 caractères")
+  .regex(/[A-Z]/, "1 majuscule requise")
+  .regex(/[a-z]/, "1 minuscule requise")
+  .regex(/[0-9]/, "1 chiffre requis")
+  .regex(/[^A-Za-z0-9]/, "1 caractère spécial requis")
+})
 
 export async function POST(req: Request) {
     try {
@@ -13,6 +26,8 @@ export async function POST(req: Request) {
                 { status: 400 }
             );
         }
+
+        schema.parse({ firstname, lastname, email, password });
 
         const existingUser = await prisma.user.findUnique({
             where: { email },
@@ -59,6 +74,10 @@ export async function POST(req: Request) {
             { status: 201 }
         );
     } catch (error) {
+        if (error instanceof ZodError) {
+            return NextResponse.json({ error: error.issues.map(e => e.message).join(", ") }, { status: 500 });
+        }
+
         console.error("Registration error:", error);
         return NextResponse.json(
             { error: "Une erreur est survenue lors de l'inscription" },
